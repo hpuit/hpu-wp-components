@@ -1,1 +1,1 @@
-export { default as PostSearchControls } from './components/PostSearchControls.js'
+export { PostSearchControls } from './components/PostSearchControls.js'

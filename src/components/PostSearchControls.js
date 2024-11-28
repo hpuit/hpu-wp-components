@@ -1,5 +1,5 @@
-export { useState, useEffect, useRef, useCallback } from '@wordpress/element';
-export { SearchControl, Spinner, Popover, Button } from '@wordpress/components';
+import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
+import { SearchControl, Spinner, Popover, Button } from '@wordpress/components';
 
 export default function PostSearchControls( props ) {
 	const [ postID,        setPostID        ] = useState( props.postID || null );

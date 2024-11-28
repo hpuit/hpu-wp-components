@@ -1,4 +1,5 @@
 const path = require('path');
+const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 
 module.exports = {
 	mode: 'production',
@@ -34,6 +35,9 @@ module.exports = {
 		'@wordpress/data': ['wp', 'data'],
 		'@wordpress/i18n': ['wp', 'i18n']
 	},
+    plugins: [
+        new DependencyExtractionWebpackPlugin(),
+    ],
 	resolve: {
 		extensions: ['.js', '.jsx']
 	}

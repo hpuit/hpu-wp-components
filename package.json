@@ -1,0 +1,26 @@
+{
+	"name": "@hpu-wp/components",
+	"version": "0.1.0",
+	"description": "Reusable React components for HPU WordPress projects.",
+	"author": "HPU Web Team",
+	"license": "GPL-2.0-or-later",
+	"homepage": "https://www.highpoint.edu/",
+	"keywords": ["react", "components", "wordpress"],
+	"main": "build/index.js",
+	"files": [
+		"build"
+	],
+	"scripts": {
+		"build": "webpack",
+		"build:clean": "npm run clean && npm run build",
+		"clean": "rimraf build",
+		"test": "test"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/hpuit/hpu-wp-components.git"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^30.4.0"
+	}
+}

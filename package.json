@@ -1,6 +1,6 @@
 {
 	"name": "@hpu-wp/components",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"description": "Reusable React components for HPU WordPress projects.",
 	"author": "HPU Web Team",
 	"license": "GPL-2.0-or-later",
@@ -23,6 +23,10 @@
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/hpuit/hpu-wp-components.git"
+	},
+	"peerDependencies": {
+		"react": "^17.0.0 || ^18.0.0",
+		"react-dom": "^17.0.0 || ^18.0.0"
 	},
 	"devDependencies": {
 		"@wordpress/components": "^28.13.0",

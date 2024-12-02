@@ -8,7 +8,7 @@ module.exports = {
 		path: path.resolve(__dirname, 'build'),
 		filename: 'index.js',
 		library: '@hpu-wp/components',
-		libraryTarget: 'commonjs2',
+		libraryTarget: 'umd',
 		globalObject: 'this'
 	},
 	module: {
@@ -25,6 +25,7 @@ module.exports = {
 			}
 		]
 	},
+	devtool: 'source-map',
 	externals: {
 		react: 'React',
 		'react-dom': 'ReactDOM',

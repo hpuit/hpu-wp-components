@@ -57,9 +57,8 @@ Ensure you have dependencies like `@wordpress/element` and `@wordpress/component
 
 props *must* include:
 
-either `postArray` OR `postID` for persistent selection on page load.
-
-`onChange` method for handling selection changes
+- either `postArray` OR `postID` for persistent selection on page load.
+- `onChange` method for handling selection changes
 
 ---
 

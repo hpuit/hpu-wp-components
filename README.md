@@ -215,6 +215,7 @@ You can override styles using the following class names:
 - `@wordpress/element`
 - `@wordpress/components`
 - WordPress REST API enabled on the backend.
+- hpu/v1 custom api developed for hpu24 theme for multisite support.
 
 ---
 

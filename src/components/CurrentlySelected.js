@@ -3,13 +3,13 @@ import { Button, Flex, Card, CardBody, BaseControl } from '@wordpress/components
 export function CurrentlySelected( { label, selectedItem, selectedItems, onRemove } ) {
 
 	// Normalize selectedItems to handle single and multi-select scenarios
-	selectedItems = selectedItems || (selectedItem ? [selectedItem] : []);
+	selectedItems = selectedItems || ( selectedItem ? [ selectedItem ] : [] );
 
 	return (
 		<BaseControl
 			label={ label || 'Currently Selected' }
 		>
-			{ selectedItems?.map( ( item ) => (
+			{ selectedItems.length && selectedItems?.map( ( item ) => (
 				<Card key={ item?.id }>
 					<CardBody
 						size='xSmall'
@@ -23,7 +23,7 @@ export function CurrentlySelected( { label, selectedItem, selectedItems, onRemov
 								variant='tertiary'
 								size='small'
 								isDestructive
-								onClick={ () => { onRemove( item ) } }
+								onClick={ () => { onRemove( item?.id ) } }
 								aria-label={ `remove ${ item?.name }` }
 							>
 								X

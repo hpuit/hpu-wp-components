@@ -1,57 +1,148 @@
 import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
-import { SearchControl, Spinner, Popover, Button } from '@wordpress/components';
+import { SearchControl, Spinner, Popover } from '@wordpress/components';
+import { CurrentlySelected } from './CurrentlySelected';
+
+const PostSearchPopover = ( {
+	isLoading,
+	queriedPosts,
+	handleChange,
+	setIsPopoverOpen,
+	...popoverProps
+} ) => {
+	return (
+		<Popover { ...popoverProps } >
+			<ul
+				className='search-results'
+				aria-live='polite'
+				style={ {
+					width: '280px',
+					padding: '0 10px'
+				} }
+			>
+				{ isLoading && <Spinner /> }
+				{ queriedPosts.map( ( result ) => (
+					<li
+						role='button'
+						tabIndex={ 0 }
+						className='is-nowrap'
+						key={ result.value }
+						onClick={ () => {
+							handleChange( result.value );
+							setIsPopoverOpen( false );
+						} }
+					>
+						{ result.label }
+					</li>
+				) ) }
+				{ ! isLoading && 0 === queriedPosts.length && (
+					<li className="no-results">No Results Found. Sorry.</li>
+				) }
+			</ul>
+		</Popover>
+	)
+}
 
 export function PostSearchControls( props ) {
+	// const [ blogID,        setblogID        ] = useState( props.blogID || null );
 	const [ postID,        setPostID        ] = useState( props.postID || null );
+	const [ postArray,     setPostArray     ] = useState( props.postArray || [] );
 	const [ post,          setPost          ] = useState( null );
 	const [ queriedPosts,  setQueriedPosts  ] = useState( [] );
 	const [ isLoading,     setIsLoading     ] = useState( false );
 	const [ isPopoverOpen, setIsPopoverOpen ] = useState( false );
 	const [ searchTrigger, setSearchTrigger ] = useState( false );
+	const searchControlRef                    = useRef( null );
 	const searchInputRef                      = useRef( '' );
+	const isMultiPost                         = ( props?.postArray );
+
 
 	// handle changes to search Input
-	const handleSearchInputChange = ( value ) => {
-		searchInputRef.current = value;
-		setSearchTrigger( value );
+	const handleSearchInputChange = ( inputValue ) => {
+		searchInputRef.current = inputValue;
+		setSearchTrigger( inputValue );
 		setIsPopoverOpen( true );
+	}
+
+	// Handle value changes based on multipost/singlepost status
+	const setValue = ( value ) => {
+		if ( isMultiPost && 'array' === typeof value ) {
+			setPostArray( value );
+		}
+		else if ( ! isMultiPost && 'array' !== typeof value ) {
+			setPostID( value );
+		}
+		else {
+			console.warn( 'received unexpected value type when setting new value: ', typeof value );
+		}
 	}
 
 	// Handle postID changes and pass to onChange() if it exists
 	const handleChange = ( value ) => {
-		setPostID( value );
 		if ( 'function' === typeof props.onChange ) {
+			// TODO handle multipost setup properly :)
+			if ( isMultiPost && 'array' !== typeof value ) {
+				value = [ value ];
+			}
 			props.onChange( value );
 		}
-	}
-
-	// Get blog name for API if needed
-	const getBlogName = async ( apiDomain, blogID ) => {
-		try {
-			const blogApiQuery = apiDomain + '/wp-json/hpu/v1/blogs?id=' + blogID;
-			const response     = await fetch ( blogApiQuery );
-		}
-		catch {}
-		finally {}
+		setValue( value );
 	}
 
 	// Strip slashes for endpoint construction
 	const stripSlashes = ( string ) => string?.replace( /^\/|\/$/, '' ) || '';
 
+	// Get blog path for API if needed
+	const fetchBlogPath = async ( apiDomain ) => {
+		let apiBlogPath;
+
+		try {
+			const blogApiQuery = apiDomain + '/wp-json/hpu/v1/blogs?id=' + blogID;
+			const response     = await fetch( blogApiQuery );
+			if ( response.ok ) {
+				const data = await response.json();
+				apiBlogPath = ( data?.path || '/' );
+			}
+		}
+		catch ( error ) {
+			console.warn( 'Error fetching blog list: ', error );
+			apiBlogPath = '/';
+		}
+
+		return apiBlogPath;
+	}
+
 	// Construct API endpoint for queries
-	const constructEndPoint = useCallback( () => {
+	const constructEndPoint = useCallback( async () => {
+		let apiBlogPath;
+		let apiRoot;
+
+		const apiDomain = stripSlashes( props?.apiDomain ) || window.location.origin;
+
+		// If blogID or blogPath defined - construct the endpoint, else use wpApiSettings for default
+		if ( props?.blogPath ) {
+			// ensure the correct amount of slashes are returned
+			apiBlogPath = ( '/' === props.blogPath ) ? '/' : `/${ stripSlashes( props.blogPath ) }/`;
+			apiRoot     = `${apiDomain}/wp-json${apiBlogPath}`;
+			console.log( 'generating blog path from blogPath: ', apiBlogPath );
+		}
+		else if ( props?.blogID ) {
+			apiBlogPath = await fetchBlogPath( apiDomain );
+			apiRoot     = `${apiDomain}/wp-json${apiBlogPath}`;
+			console.log( 'generating blog path from blogID: ', apiBlogPath );
+		}
+		else {
+			apiRoot = wpApiSettings.root;
+			console.log( 'generated apiRoot from wpApiSettings.root: ', apiRoot );
+		}
 
 		// if using a custon namespace for the api, do not assume a default post-type is needed
+		const apiNameSpace    = stripSlashes( props?.apiNameSpace ) || 'wp/v2';
 		const defaultPostType = ( props?.apiNameSpace ) ? '' : 'posts';
+		const postType        = props?.postType || defaultPostType;
 
-		// Assemble the endpoint
-		const apiDomain       = stripSlashes( props?.apiDomain )    || window.location.origin;
-		const apiBlogName     = ( props?.blogID ) ? getBlogName( apiDomain, props.blogID ) : '/';
-		const apiNameSpace    = stripSlashes( props?.apiNameSpace ) || 'wp-json/wp/v2';
-		const postType        = stripSlashes( props?.postType )     || defaultPostType;
-
-		return stripSlashes( `${ apiDomain }${apiBlogName}${ apiNameSpace }/${ postType }` );
-	}, [ props.apiDomain, props.apiNameSpace, props.postType ] );
+		// return the constructed endpoint
+		return stripSlashes( `${ apiRoot }${ apiNameSpace }/${ postType }` );
+	}, [ props.apiDomain, props.blogPath, props.blogID, props.apiNameSpace, props.postType ] );
 
 	// Fetch posts for selector
 	useEffect( () => {
@@ -66,7 +157,7 @@ export function PostSearchControls( props ) {
 		// retrieve post list
 		const fetchPosts = async () => {
 			try {
-				const apiEndPoint = constructEndPoint();
+				const apiEndPoint = await constructEndPoint();
 				const searchQuery = searchInputRef.current
 					? `?search=${ searchInputRef.current }&per_page=20`
 					: '?per_page=20&orderby=date';
@@ -103,7 +194,7 @@ export function PostSearchControls( props ) {
 		if ( postID ) {
 			const fetchPost = async () => {
 				try {
-					const apiEndPoint = constructEndPoint();
+					const apiEndPoint = await constructEndPoint();
 					const response    = await fetch ( `${ apiEndPoint }/${ postID }` )
 					if ( response.ok ) {
 						const data = await response.json();
@@ -121,26 +212,23 @@ export function PostSearchControls( props ) {
 		}
 	}, [ postID, constructEndPoint ] )
 
+	// Fetch post(s) when the postArray or postID changes
+	useEffect( () => {
+		if
+	} )
+
 	// Render Component
 	return (
 		<div className='post-search-control'>
 			{ post && (
-				<div className='post-search-control-selected'>
-					<label>Currently selected</label>
-					<div>
-						<span>{ post.title?.rendered || post.title }</span>
-						<Button
-							variant='tertiary'
-							size='small'
-							isDestructive
-							onClick={ () => {
-								handleChange( null );
-							} }
-						>X</Button>
-					</div>
-				</div>
+				<CurrentlySelected
+					label='Selected Profile'
+					selectedItem={ { name: post.title?.rendered, id: post.id } }
+					onRemove={ ( item ) => { handleChange( null ) } }
+				/>
 			) }
 			<SearchControl
+				ref={ searchControlRef }
 				className='post-search-control-selector'
 				label={ props.searchLabel || 'Search Posts' }
 				hideLabelFromVision={ false }
@@ -149,31 +237,14 @@ export function PostSearchControls( props ) {
 				__nextHasNoMarginBottom
 			/>
 			{ isPopoverOpen && (
-				<Popover
+				<PostSearchPopover
+					anchor={ searchControlRef.current }
 					className='post-search-control-results'
 					onClose={ () => setIsPopoverOpen( false ) }
-					position='bottom'
-				>
-					<ul className='search-results' aria-live='polite'>
-						{ isLoading && <Spinner /> }
-						{ queriedPosts.map( ( result ) => (
-							<li
-								role='button'
-								tabIndex={ 0 }
-								key={ result.value }
-								onClick={ () => {
-									handleChange( result.value );
-									setIsPopoverOpen( false );
-								} }
-							>
-								{ result.label }
-							</li>
-						) ) }
-						{ ! isLoading && 0 === queriedPosts.length && (
-							<li className="no-results">No Results Found. Sorry.</li>
-						) }
-					</ul>
-				</Popover>
+					position='bottom center'
+					isLoading={ isLoading }
+					queriedPosts={ queriedPosts }
+				/>
 			) }
 		</div>
 	)

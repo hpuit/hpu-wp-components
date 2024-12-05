@@ -4,6 +4,7 @@ import { CurrentlySelected } from './CurrentlySelected';
 import './assets/css/PostSearchControls.scss';
 
 export function PostSearchControls( props ) {
+	console.log( 'controls', props.postType );
 	const isMultiPost                 = props?.postArray !== undefined;
 	const [ postArray, setPostArray ] = useState( () => {
 		if ( props?.postArray && Array.isArray( props?.postArray ) ) {
@@ -124,7 +125,7 @@ export function PostSearchControls( props ) {
 	}
 
 	// Construct API endpoint for queries
-	const constructEndPoint = useCallback( async () => {
+	const constructEndPoint = async () => {
 		let apiBlogPath;
 		let apiRoot;
 
@@ -151,7 +152,7 @@ export function PostSearchControls( props ) {
 
 		// return the constructed endpoint
 		return stripSlashes( `${ apiRoot }${ apiNameSpace }/${ postType }` );
-	}, [] );
+	};
 
 	// Fetch post(s) when the postArray or postID changes
 	useEffect( () => {
@@ -211,8 +212,7 @@ export function PostSearchControls( props ) {
 				<Popover
 					anchor={ searchControlRef.current }
 					className='hpu-post-search-control-results'
-					placement='left-start'
-					handleChange={ ( value ) => { addPost( value ) } }
+					placement={ props?.placement || 'left-start' }
 					onClose={ () => { setIsPopoverOpen( false ) } }
 				>
 					<ul

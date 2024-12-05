@@ -14,13 +14,8 @@
 				color: #9ea1a7;
 			}
 	
-			&:hover {
+			&:hover:not( .selected ) {
 				color: #007cba;
-			}
-
-			&:focus {
-				box-shadow: 0 0 0 2px #007cba;
-				outline: 3px solid #0000;
 			}
 		}
 	}

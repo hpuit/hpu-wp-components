@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
-import { SearchControl } from '@wordpress/components';
+import { SearchControl, Popover, Spinner } from '@wordpress/components';
 import { CurrentlySelected } from './CurrentlySelected';
-import { PostSearchPopover } from './PostSearchPopover';
+import './assets/css/PostSearchControls.scss';
 
 export function PostSearchControls( props ) {
 	const isMultiPost                 = props?.postArray !== undefined;
@@ -16,11 +16,11 @@ export function PostSearchControls( props ) {
 	} );
 	const [ posts,         setPosts         ] = useState( null );
 	const [ isLoading,     setIsLoading     ] = useState( false );
-	const [ searchTrigger, setSearchTrigger ] = useState( false );
-	const isPopoverOpen                       = useRef( false );
-	const queriedPosts                        = useRef( [] );
+	const [ isPopoverOpen, setIsPopoverOpen ] = useState( false );
+	const [ searchInput,   setSearchInput   ] = useState( '' );
+	const [ queriedPosts,  setQueriedPosts  ] = useState( [] );
 	const searchControlRef                    = useRef( null );
-	const searchInputRef                      = useRef( '' );
+	const searchDebounceTimeout               = useRef( null );
 
 	// Handle postID changes and pass to onChange() if it exists
 	const addPost = ( value ) => {
@@ -56,11 +56,49 @@ export function PostSearchControls( props ) {
 	}
 
 	// handle changes to search Input
-	const handleSearchInputChange = ( inputValue ) => {
-		searchInputRef.current = inputValue;
-		setSearchTrigger( inputValue );
-		isPopoverOpen.current = true ;
-	}
+	const handleSearchInputChange = useCallback( ( inputValue ) => {
+		setSearchInput( inputValue );
+		setIsPopoverOpen( true );
+		clearTimeout( searchDebounceTimeout.current );
+
+		if ( inputValue.length === 0 ) {
+			setQueriedPosts( [] );
+			setIsLoading( false );
+			return;
+		}
+
+		setIsLoading( true );
+
+		// retrieve post list
+		searchDebounceTimeout.current = setTimeout( async () => {
+			try {
+				const apiEndPoint = await constructEndPoint();
+				const searchQuery = searchInput
+					? `?search=${ searchInput }&per_page=20`
+					: '?per_page=20&orderby=date';
+				const apiQuery    = ( apiEndPoint + searchQuery );
+				const response    = await fetch ( apiQuery );
+				if ( response.ok ) {
+					const data = await response.json();
+					setQueriedPosts( data.map( ( result ) => ( {
+						label: result?.title?.rendered || 'Untitled',
+						value: result.id,
+					} ) ) );
+				}
+			}
+			catch ( error ) {
+				console.warn( 'Error fetching posts: ', error );
+			}
+			finally {
+				setIsLoading( false );
+			}
+		}, 600 );
+	} );
+
+	// Cleanup debounce on component re-render TODO verify that moving back to state for input/isLoading doesn't break this
+	useEffect( () => {
+		return () => clearTimeout( searchDebounceTimeout.current );
+	}, [] );
 
 	// Strip slashes for endpoint construction
 	const stripSlashes = ( string ) => string?.replace( /^\/|\/$/, '' ) || '';
@@ -115,49 +153,6 @@ export function PostSearchControls( props ) {
 		return stripSlashes( `${ apiRoot }${ apiNameSpace }/${ postType }` );
 	}, [] );
 
-	// Fetch posts for selector
-	useEffect( () => {
-		if ( ! searchTrigger ) {
-			queriedPosts.current = [];
-			setIsLoading( false );
-			return;
-		}
-
-		setIsLoading( true );
-
-		// retrieve post list
-		const fetchPosts = async () => {
-			try {
-				const apiEndPoint = await constructEndPoint();
-				const searchQuery = searchInputRef.current
-					? `?search=${ searchInputRef.current }&per_page=20`
-					: '?per_page=20&orderby=date';
-				const apiQuery    = ( apiEndPoint + searchQuery );
-				const response    = await fetch ( apiQuery );
-				if ( response.ok ) {
-					const data = await response.json();
-					queriedPosts.current = data.map( ( result ) => ( {
-						label: result?.title?.rendered || 'Untitled',
-						value: result.id,
-					} ) );
-				}
-			}
-			catch ( error ) {
-				console.warn( 'Error fetching posts: ', error );
-			}
-			finally {
-				setIsLoading( false );
-			}
-		};
-
-		// Setup the timeout query
-		const searchTimeout = setTimeout( fetchPosts, 200 );
-
-		// reset the timeout on additional inputs
-		return () => clearTimeout( searchTimeout );
-
-	}, [ searchTrigger, constructEndPoint ] );
-
 	// Fetch post(s) when the postArray or postID changes
 	useEffect( () => {
 		if ( postArray && postArray.length > 0 ) {
@@ -197,7 +192,7 @@ export function PostSearchControls( props ) {
 				className='post-search-control-selector'
 				label={ props?.searchLabel || 'Search Posts' }
 				hideLabelFromVision={ false }
-				value={ searchInputRef.current }
+				value={ searchInput }
 				onChange={ handleSearchInputChange }
 				__nextHasNoMarginBottom
 			/>
@@ -212,19 +207,45 @@ export function PostSearchControls( props ) {
 					} }
 				/>
 			) }
-			<PostSearchPopover
-				anchor={ searchControlRef.current }
-				className='post-search-control-results'
-				placement='left-start'
-				postArray={ postArray }
-				isMultiPost={ isMultiPost }
-				isLoading={ isLoading }
-				searchInput={ searchInputRef.current }
-				queriedPosts={ queriedPosts.current }
-				handleChange={ ( value ) => { addPost( value ) } }
-				isPopoverOpen={ isPopoverOpen.current }
-				closePopover={ () => { isPopoverOpen.current = false } }
-			/>
+			{ isPopoverOpen && searchInput.length ? (
+				<Popover
+					anchor={ searchControlRef.current }
+					className='hpu-post-search-control-results'
+					placement='left-start'
+					handleChange={ ( value ) => { addPost( value ) } }
+					onClose={ () => { setIsPopoverOpen( false ) } }
+				>
+					<ul
+						className='search-results'
+						aria-live='polite'
+					>
+						{ isLoading && <Spinner /> }
+						{ queriedPosts.map( ( result ) => (
+							<li
+								role='button'
+								tabIndex={ 0 }
+								className={
+									`search-result${
+										postArray.includes( result.value )
+											? ' selected'
+											: '' 
+									}` 
+								}
+								key={ result.value }
+								onClick={ () => {
+									addPost( result.value );
+									setIsPopoverOpen( isMultiPost );
+								} }
+							>
+								{ result.label }
+							</li>
+						) ) }
+						{ ! isLoading && ! queriedPosts.length ? (
+							<li className="search-result no-results">No Results Found. Sorry.</li>
+						) : ( null ) }
+					</ul>
+				</Popover>
+			) : ( null ) }
 		</div>
 	)
 }

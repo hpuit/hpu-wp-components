@@ -1,6 +1,6 @@
 {
 	"name": "@hpu-wp/components",
-	"version": "0.2.0",
+	"version": "0.2.7",
 	"description": "Reusable React components for HPU WordPress projects.",
 	"author": "HPU Web Team",
 	"license": "GPL-2.0-or-later",
@@ -15,9 +15,11 @@
 		"build"
 	],
 	"scripts": {
+		"clean": "rimraf build",
 		"build": "webpack",
 		"build:clean": "npm run clean && npm run build",
-		"clean": "rimraf build",
+		"start": "webpack --watch",
+		"start:clean": "npm run clean && npm run start",
 		"test": "test"
 	},
 	"repository": {
@@ -32,6 +34,10 @@
 		"@wordpress/components": "^28.13.0",
 		"@wordpress/dependency-extraction-webpack-plugin": "^6.13.0",
 		"@wordpress/element": "^6.13.0",
-		"@wordpress/scripts": "^30.4.0"
+		"@wordpress/scripts": "^30.4.0",
+		"css-loader": "^7.1.2",
+		"sass": "^1.82.0",
+		"sass-loader": "^16.0.4",
+		"style-loader": "^4.0.0"
 	}
 }

@@ -41,17 +41,17 @@ Ensure you have dependencies like `@wordpress/element` and `@wordpress/component
 
 ### Props
 
-| Prop              | Type                 | Description                                                                                     | Default                |
-|--------------------|----------------------|-------------------------------------------------------------------------------------------------|------------------------|
-| `postID`          | `number`            | ID of the initial post to select (single-select mode).                                          | `null`                |
-| `postArray`       | `number[]`          | Array of post IDs to initialize in multi-select mode.                                           | `[]`                  |
-| `onChange`        | `function`          | Callback fired when the selection changes. Receives the selected post ID(s) as an argument.    | `null`                |
-| `searchLabel`     | `string`            | Label for the search input field.                                                              | `'Search Posts'`      |
-| `apiDomain`       | `string`            | Base domain for the WordPress REST API.                                                        | `window.location.origin` |
-| `apiNameSpace`    | `string`            | Custom namespace for the REST API.                                                             | `'wp/v2'`             |
-| `postType`        | `string`            | Post type to search and fetch.                                                                 | `'posts'`             |
-| `blogID`          | `number`            | Blog ID for multi-site installations.                                                          | `null`                |
-| `blogPath`        | `string`            | Blog path for multi-site installations.                                                        | `null`                |
+| Prop           | Type       | Description                                                                                                        | Default                  |
+|----------------|------------|--------------------------------------------------------------------------------------------------------------------|--------------------------|
+| `postID`       | `number`   | ID of the initial post to select (single-select mode).                                                             | `null`                   |
+| `postArray`    | `number[]` | Array of post IDs to initialize in multi-select mode.                                                              | `[]`                     |
+| `onChange`     | `function` | Callback fired when the selection changes. Receives an array if using `postArray` or a single ID if using `postID` | `null`                   |
+| `searchLabel`  | `string`   | Label for the search input field.                                                                                  | `'Search Posts'`         |
+| `apiDomain`    | `string`   | Base domain for the WordPress REST API.                                                                            | `window.location.origin` |
+| `apiNameSpace` | `string`   | Custom namespace for the REST API.                                                                                 | `'wp/v2'`                |
+| `postType`     | `string`   | Post type to search and fetch.                                                                                     | `'posts'`                |
+| `blogID`       | `number`   | Blog ID for multi-site installations.                                                                              | `null`                   |
+| `blogPath`     | `string`   | Blog path for multi-site installations.                                                                            | `null`                   |
 
 ### Required
 

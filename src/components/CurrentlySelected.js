@@ -8,8 +8,9 @@ export function CurrentlySelected( { label, selectedItem, selectedItems, onRemov
 	return (
 		<BaseControl
 			label={ label || 'Currently Selected' }
+			className='hpu-component-currently-selected'
 		>
-			{ selectedItems.length && selectedItems?.map( ( item ) => (
+			{ selectedItems.length ? selectedItems?.map( ( item ) => (
 				<Card key={ item?.id }>
 					<CardBody
 						size='xSmall'
@@ -31,7 +32,7 @@ export function CurrentlySelected( { label, selectedItem, selectedItems, onRemov
 						</Flex>
 					</CardBody>
 				</Card>
-			) ) }
+			) ) : ( null ) }
 		</BaseControl>
 	)
 }

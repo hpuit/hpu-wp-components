@@ -4,7 +4,7 @@ import { CurrentlySelected } from './CurrentlySelected';
 import { PostSearchPopover } from './PostSearchPopover';
 
 export function PostSearchControls( props ) {
-	const isMultiPost                 = ( props?.postArray );
+	const isMultiPost                 = props?.postArray !== undefined;
 	const [ postArray, setPostArray ] = useState( () => {
 		if ( props?.postArray && Array.isArray( props?.postArray ) ) {
 			return props.postArray;
@@ -15,10 +15,10 @@ export function PostSearchControls( props ) {
 		return [];
 	} );
 	const [ posts,         setPosts         ] = useState( null );
-	const [ queriedPosts,  setQueriedPosts  ] = useState( [] );
 	const [ isLoading,     setIsLoading     ] = useState( false );
-	const [ isPopoverOpen, setIsPopoverOpen ] = useState( false );
 	const [ searchTrigger, setSearchTrigger ] = useState( false );
+	const isPopoverOpen                       = useRef( false );
+	const queriedPosts                        = useRef( [] );
 	const searchControlRef                    = useRef( null );
 	const searchInputRef                      = useRef( '' );
 
@@ -28,7 +28,7 @@ export function PostSearchControls( props ) {
 			return;
 		}
 
-		const updatedArray = isMultiPost ? [ value, ...postArray ] : [ value ];
+		const updatedArray = isMultiPost ? [ ...postArray, value ] : [ value ];
 		setPostArray( updatedArray );
 		handleChange( updatedArray );
 	}
@@ -59,7 +59,7 @@ export function PostSearchControls( props ) {
 	const handleSearchInputChange = ( inputValue ) => {
 		searchInputRef.current = inputValue;
 		setSearchTrigger( inputValue );
-		setIsPopoverOpen( true );
+		isPopoverOpen.current = true ;
 	}
 
 	// Strip slashes for endpoint construction
@@ -96,11 +96,11 @@ export function PostSearchControls( props ) {
 		if ( props?.blogPath ) {
 			// ensure the correct amount of slashes are returned
 			apiBlogPath = ( '/' === props.blogPath ) ? '/' : `/${ stripSlashes( props.blogPath ) }/`;
-			apiRoot     = `${apiDomain}/wp-json${apiBlogPath}`;
+			apiRoot     = `${apiDomain}${apiBlogPath}wp-json/`;
 		}
 		else if ( props?.blogID ) {
 			apiBlogPath = await fetchBlogPath( apiDomain );
-			apiRoot     = `${apiDomain}/wp-json${apiBlogPath}`;
+			apiRoot     = `${apiDomain}${apiBlogPath}wp-json/`;
 		}
 		else {
 			apiRoot = wpApiSettings.root;
@@ -113,12 +113,12 @@ export function PostSearchControls( props ) {
 
 		// return the constructed endpoint
 		return stripSlashes( `${ apiRoot }${ apiNameSpace }/${ postType }` );
-	}, [ props.apiDomain, props.blogPath, props.blogID, props.apiNameSpace, props.postType ] );
+	}, [] );
 
 	// Fetch posts for selector
 	useEffect( () => {
 		if ( ! searchTrigger ) {
-			setQueriedPosts( [] );
+			queriedPosts.current = [];
 			setIsLoading( false );
 			return;
 		}
@@ -136,12 +136,10 @@ export function PostSearchControls( props ) {
 				const response    = await fetch ( apiQuery );
 				if ( response.ok ) {
 					const data = await response.json();
-					setQueriedPosts(
-						data.map( ( result ) => ( {
-							label: result?.title?.rendered || 'Untitled',
-							value: result.id,
-						} ) )
-					);
+					queriedPosts.current = data.map( ( result ) => ( {
+						label: result?.title?.rendered || 'Untitled',
+						value: result.id,
+					} ) );
 				}
 			}
 			catch ( error ) {
@@ -193,35 +191,40 @@ export function PostSearchControls( props ) {
 
 	// Render Component
 	return (
-		<div className='post-search-control'>
-			{ posts && (
-				<CurrentlySelected
-					label='Selected Profile'
-					selectedItems={ posts.map( ( post ) => ( { name: post.title?.rendered, id: post.id } ) ) }
-					onRemove={ ( value ) => { removePost( value ) } }
-				/>
-			) }
+		<div className='hpu-component-post-search-control'>
 			<SearchControl
 				ref={ searchControlRef }
 				className='post-search-control-selector'
-				label={ props.searchLabel || 'Search Posts' }
+				label={ props?.searchLabel || 'Search Posts' }
 				hideLabelFromVision={ false }
 				value={ searchInputRef.current }
 				onChange={ handleSearchInputChange }
 				__nextHasNoMarginBottom
 			/>
-			{ isPopoverOpen && (
-				<PostSearchPopover
-					anchor={ searchControlRef.current }
-					className='post-search-control-results'
-					onClose={ () => setIsPopoverOpen( false ) }
-					position='bottom center'
-					isLoading={ isLoading }
-					queriedPosts={ queriedPosts }
-					handleChange={ ( value ) => { addPost( value ) } }
-					setIsPopoverOpen={ setIsPopoverOpen }
+			{ posts && (
+				<CurrentlySelected
+					label={ props?.selectedLabel || 'Selected Posts' }
+					className='post-search-control-currently-selected'
+					selectedItems={ posts.map( ( post ) => ( { name: post.title?.rendered, id: post.id } ) ) }
+					onRemove={ ( value ) => { removePost( value ) } }
+					style={ {
+						borderBottom: '1px solid #eee'
+					} }
 				/>
 			) }
+			<PostSearchPopover
+				anchor={ searchControlRef.current }
+				className='post-search-control-results'
+				placement='left-start'
+				postArray={ postArray }
+				isMultiPost={ isMultiPost }
+				isLoading={ isLoading }
+				searchInput={ searchInputRef.current }
+				queriedPosts={ queriedPosts.current }
+				handleChange={ ( value ) => { addPost( value ) } }
+				isPopoverOpen={ isPopoverOpen.current }
+				closePopover={ () => { isPopoverOpen.current = false } }
+			/>
 		</div>
 	)
 }

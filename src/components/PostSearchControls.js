@@ -4,7 +4,6 @@ import { CurrentlySelected } from './CurrentlySelected';
 import './assets/css/PostSearchControls.scss';
 
 export function PostSearchControls( props ) {
-	console.log( 'controls', props.postType );
 	const isMultiPost                 = props?.postArray !== undefined;
 	const [ postArray, setPostArray ] = useState( () => {
 		if ( props?.postArray && Array.isArray( props?.postArray ) ) {

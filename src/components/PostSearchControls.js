@@ -76,7 +76,8 @@ export function PostSearchControls( props ) {
 				const searchQuery = searchInput
 					? `?search=${ searchInput }&per_page=20`
 					: '?per_page=20&orderby=date';
-				const apiQuery    = ( apiEndPoint + searchQuery );
+				const wpNonce     = props?.wpNonce ? `&_wpnonce=${ props.wpNonce }` : '';
+				const apiQuery    = ( apiEndPoint + searchQuery + wpNonce );
 				const response    = await fetch ( apiQuery );
 				if ( response.ok ) {
 					const data = await response.json();

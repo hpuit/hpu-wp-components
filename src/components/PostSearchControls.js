@@ -96,7 +96,7 @@ export function PostSearchControls( props ) {
 		}, 600 );
 	} );
 
-	// Cleanup debounce on component re-render TODO verify that moving back to state for input/isLoading doesn't break this
+	// Cleanup debounce on component re-render
 	useEffect( () => {
 		return () => clearTimeout( searchDebounceTimeout.current );
 	}, [] );
@@ -154,36 +154,41 @@ export function PostSearchControls( props ) {
 		return stripSlashes( `${ apiRoot }${ apiNameSpace }/${ postType }` );
 	};
 
+	const maybeFetchPosts = () => {
+		// TODO refine bail condition - posts is often null or one state behind when updated.  Need to avoid loops, maybe already okay though?  Maybe Ref for prevPostArray needs to return?
+		const fetchPosts = async () => {
+			try {
+				const apiEndPoint  = await constructEndPoint();
+				const updatedPosts = await Promise.all(
+					postArray.map( async ( postID ) => {
+						const response = await fetch( `${ apiEndPoint }/${ postID }` )
+						if ( response.ok ) {
+							return await response.json();
+						}
+						else {
+							console.warn( `Error fetching post with ID ${ postID }: `, response.statusText );
+							return null;
+						}
+					} )
+				);
+				setPosts( updatedPosts.filter( ( post ) => post !== null ) );
+			}
+			catch ( error ) {
+				console.warn( 'Error fetching selected post: ', error );
+			}
+		}
+		fetchPosts();
+	}
+
 	// Fetch post(s) when the postArray or postID changes
 	useEffect( () => {
 		if ( postArray && postArray.length > 0 ) {
-			const fetchPosts = async () => {
-				try {
-					const apiEndPoint  = await constructEndPoint();
-					const updatedPosts = await Promise.all(
-						postArray.map( async ( postID ) => {
-							const response = await fetch( `${ apiEndPoint }/${ postID }` )
-							if ( response.ok ) {
-								return await response.json();
-							}
-							else {
-								console.warn( `Error fetching post with ID ${ postID }: `, response.statusText );
-								return null;
-							}
-						} )
-					);
-					setPosts( updatedPosts.filter( ( post ) => post !== null ) );
-				}
-				catch ( error ) {
-					console.warn( 'Error fetching selected post: ', error );
-				}
-			}
-			fetchPosts();
+			maybeFetchPosts();
 		}
 		else {
 			setPosts( null );
 		}
-	}, [ postArray, constructEndPoint ] );
+	}, [ postArray ] );
 
 	// Render Component
 	return (

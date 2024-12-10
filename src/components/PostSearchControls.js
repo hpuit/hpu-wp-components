@@ -4,6 +4,7 @@ import { CurrentlySelected } from './CurrentlySelected';
 import './assets/css/PostSearchControls.scss';
 
 export function PostSearchControls( props ) {
+	console.log( 'props', props );
 	const isMultiPost                 = props?.postArray !== undefined;
 	const [ postArray, setPostArray ] = useState( () => {
 		if ( props?.postArray && Array.isArray( props?.postArray ) ) {
@@ -14,6 +15,15 @@ export function PostSearchControls( props ) {
 		}
 		return [];
 	} );
+	const {
+		blogPath     = null,
+		blogID       = null,
+		apiDomain    = window.location.origin,
+		apiNameSpace = null,
+		postType     = null,
+		wpNonce      = null,
+		onChange     = ( () => {} ),
+	} = props;
 	const [ posts,         setPosts         ] = useState( null );
 	const [ isLoading,     setIsLoading     ] = useState( false );
 	const [ isPopoverOpen, setIsPopoverOpen ] = useState( false );
@@ -48,11 +58,8 @@ export function PostSearchControls( props ) {
 
 	// Wrapper to ensure onChange receives an ID or array of IDs as expected
 	const handleChange = ( updatedArray ) => {
-		if ( 'function' !== typeof props?.onChange ) {
-			return;
-		}
 		const value = ( isMultiPost ) ? updatedArray : updatedArray[0];
-		props.onChange( value );
+		onChange( value );
 	}
 
 	// handle changes to search Input
@@ -76,8 +83,8 @@ export function PostSearchControls( props ) {
 				const searchQuery = searchInput
 					? `?search=${ searchInput }&per_page=20`
 					: '?per_page=20&orderby=date';
-				const wpNonce     = props?.wpNonce ? `&_wpnonce=${ props.wpNonce }` : '';
-				const apiQuery    = ( apiEndPoint + searchQuery + wpNonce );
+				const nonce       = wpNonce ? `&_wpnonce=${ wpNonce }` : '';
+				const apiQuery    = ( apiEndPoint + searchQuery + nonce );
 				const response    = await fetch ( apiQuery );
 				if ( response.ok ) {
 					const data = await response.json();
@@ -105,7 +112,10 @@ export function PostSearchControls( props ) {
 	const stripSlashes = ( string ) => string?.replace( /^\/|\/$/, '' ) || '';
 
 	// Get blog path for API if needed
-	const fetchBlogPath = async ( apiDomain ) => {
+	const fetchBlogPath = async () => {
+		if ( ! blogID ) {
+			return '/';
+		}
 		let apiBlogPath;
 
 		try {
@@ -126,32 +136,33 @@ export function PostSearchControls( props ) {
 
 	// Construct API endpoint for queries
 	const constructEndPoint = async () => {
-		let apiBlogPath;
-		let apiRoot;
+		let queryBlogPath;
+		let queryRoot;
 
-		const apiDomain = stripSlashes( props?.apiDomain ) || window.location.origin;
+		const queryDomain = stripSlashes( apiDomain );
+		console.log( 'constructEndpoint', props );
 
 		// If blogID or blogPath defined - construct the endpoint, else use wpApiSettings for default
-		if ( props?.blogPath ) {
+		if ( blogPath ) {
 			// ensure the correct amount of slashes are returned
-			apiBlogPath = ( '/' === props.blogPath ) ? '/' : `/${ stripSlashes( props.blogPath ) }/`;
-			apiRoot     = `${apiDomain}${apiBlogPath}wp-json/`;
+			queryBlogPath = ( '/' === blogPath ) ? '/' : `/${ stripSlashes( blogPath ) }/`;
+			queryRoot     = `${queryDomain}${queryBlogPath}wp-json/`;
 		}
-		else if ( props?.blogID ) {
-			apiBlogPath = await fetchBlogPath( apiDomain );
-			apiRoot     = `${apiDomain}${apiBlogPath}wp-json/`;
+		else if ( blogID ) {
+			queryBlogPath = await fetchBlogPath( apiDomain );
+			queryRoot     = `${queryDomain}${queryBlogPath}wp-json/`;
 		}
 		else {
-			apiRoot = wpApiSettings.root;
+			queryRoot = wpApiSettings.root;
 		}
 
 		// if using a custon namespace for the api, do not assume a default post-type is needed
-		const apiNameSpace    = stripSlashes( props?.apiNameSpace ) || 'wp/v2';
-		const defaultPostType = ( props?.apiNameSpace ) ? '' : 'posts';
-		const postType        = props?.postType || defaultPostType;
+		const queryNameSpace  = stripSlashes( apiNameSpace ) || 'wp/v2';
+		const defaultPostType = ( apiNameSpace ) ? '' : 'posts';
+		const queryPostType   = postType || defaultPostType;
 
 		// return the constructed endpoint
-		return stripSlashes( `${ apiRoot }${ apiNameSpace }/${ postType }` );
+		return stripSlashes( `${ queryRoot }${ queryNameSpace }/${ queryPostType }` );
 	};
 
 	const maybeFetchPosts = () => {
@@ -192,10 +203,10 @@ export function PostSearchControls( props ) {
 
 	// Render Component
 	return (
-		<div className='hpu-component-post-search-control'>
+		<div className='hpu-post-search-control'>
 			<SearchControl
 				ref={ searchControlRef }
-				className='post-search-control-selector'
+				className='hpu-post-search-control--search-input'
 				label={ props?.searchLabel || 'Search Posts' }
 				hideLabelFromVision={ false }
 				value={ searchInput }
@@ -205,7 +216,7 @@ export function PostSearchControls( props ) {
 			{ posts && (
 				<CurrentlySelected
 					label={ props?.selectedLabel || 'Selected Posts' }
-					className='post-search-control-currently-selected'
+					className='hpu-post-search-control--currently-selected'
 					selectedItems={ posts.map( ( post ) => ( { name: post.title?.rendered, id: post.id } ) ) }
 					onRemove={ ( value ) => { removePost( value ) } }
 					style={ {
@@ -216,7 +227,7 @@ export function PostSearchControls( props ) {
 			{ isPopoverOpen && searchInput.length ? (
 				<Popover
 					anchor={ searchControlRef.current }
-					className='hpu-post-search-control-results'
+					className='hpu-post-search-control--results'
 					placement={ props?.placement || 'left-start' }
 					onClose={ () => { setIsPopoverOpen( false ) } }
 				>
@@ -246,7 +257,7 @@ export function PostSearchControls( props ) {
 							</li>
 						) ) }
 						{ ! isLoading && ! queriedPosts.length ? (
-							<li className="search-result no-results">No Results Found. Sorry.</li>
+							<li className='search-result no-results'>No Results Found. Sorry.</li>
 						) : ( null ) }
 					</ul>
 				</Popover>

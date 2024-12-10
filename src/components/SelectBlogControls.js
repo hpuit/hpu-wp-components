@@ -1,68 +1,130 @@
-import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
-import { SearchControl, Popover } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import { ComboboxControl } from '@wordpress/components';
+import './assets/css/SelectBlogControls.scss';
 
 export function SelectBlogControls ( props ) {
-	const [ blog, setBlog ] = useState( props?.blogID || null );
-	const [ blogList, setBlogList ] = useState( [] );
-	const [ isLoading, setIsLoading ] = useState( false );
-	const [ isPopoverOpen, setIsPopoverOpen ] = useState( false );
-	const [ searchInput, setSearchInput ] = useState( '' );
-	const searchControlRef = useRef( null );
+	const [ selectedBlog, setSelectedBlog ] = useState( props?.blogID || '' );
+	const [ blogFilter,   setBlogFilter   ] = useState( '' );
+	const [ blogList,     setBlogList     ] = useState( [] );
+	const [ options,      setOptions      ] = useState( [] );
 
+	const handleChange = props?.onChange || ( () => {} );
 
+	// Handle changes to selected blog
 	useEffect( () => {
-		// Fetch blogs for select
-		const fetchBlogs = async () => {
-			let data = null;
-			const apiDomain = props?.apiDomain || window.location.origin;
-			try {
-				const blogApiQuery = apiDomain + '/wp-json/hpu/v1/blogs?per_page=0';
-				const response     = await fetch( blogApiQuery );
-				if ( response.ok ) {
-					data = await response.json();
-					setBlogList( data );
-				}
-			}
-			catch ( error ) {
-				console.warn( 'Error fetching blog list: ', error );
-			}
-			finally {
-				console.log( data );
+		handleChange( selectedBlog );
+	}, [ selectedBlog ] );
+
+	// Update bloglist on filter change
+	useEffect( () => {
+		fetchBlogs();
+	}, [ blogFilter, selectedBlog ] );
+
+	// Update options when blogList or selected blog changes
+	useEffect( () => {
+		updateOptions();
+	}, [ blogList, selectedBlog ] );
+
+	const fetchSingleBlog = async () => {
+		if ( ! selectedBlog ) {
+			return [];
+		}
+
+		let data = null;
+		const apiDomain = props?.apiDomain || window.location.origin;
+
+		try {
+			const blogApiQuery = `${ apiDomain }/wp-json/hpu/v1/blogs/${ selectedBlog }`;
+			const response     = await fetch( blogApiQuery );
+			if ( response.ok ) {
+				data = await response.json();
 			}
 		}
-		fetchBlogs();
-	}, [] );
+		catch ( error ) {
+			console.warn( 'Error fetching single blog: ', error );
+		}
+		finally {
+			return data;
+		}
+	}
+	
+	// Fetch blogs for select
+	const fetchBlogs = async () => {
+		let data = [];
+		let filter = '';
+		const apiDomain = props?.apiDomain || window.location.origin;
 
+		if ( blogFilter ) {
+			filter += '&search=' + blogFilter;
+		}
+
+		if ( selectedBlog ) {
+			filter += '&exclude=' + selectedBlog;
+		}
+
+		try {
+			const blogApiQuery = `${ apiDomain }/wp-json/hpu/v1/blogs?per_page=20${ filter }`;
+			const response     = await fetch( blogApiQuery );
+			if ( response.ok ) {
+				data = await response.json();
+			}
+		}
+		catch ( error ) {
+			console.warn( 'Error fetching blog list: ', error );
+		}
+		finally {
+			setBlogList( data );
+		}
+	}
+
+	const parseBlogInfo = ( blog ) => {
+		const blogID    = blog?.id || null;
+		if ( ! blogID ) {
+			return null;
+		}
+
+		const blogName  = decodeHtmlEntities( blog?.name ) || 'Untitled';
+		const blogPath  = decodeHtmlEntities( blog?.path ) || '';
+		const blogLabel = `${ blogName } - ${ blogPath }`;
+
+		return { value: blogID, label: blogLabel };
+	}
+
+	const decodeHtmlEntities = ( input ) => {
+		const parser = new DOMParser();
+		const doc    = parser.parseFromString( input, 'text/html' );
+		return doc.documentElement.textContent;
+	};
+
+	// Render options for select
+	const updateOptions = async () => {
+		let newOptions = [];
+
+		const currentOption = await fetchSingleBlog();
+		if ( currentOption && currentOption?.id ) {
+			newOptions.push( parseBlogInfo( currentOption ) );
+		}
+
+		const filteredOptions = blogList.map( ( blog ) => {
+			return parseBlogInfo( blog );
+		} );
+
+		newOptions = [ ...newOptions, ...filteredOptions ];
+		setOptions( newOptions );
+	}
+
+	// Return the component
 	return (
-		<div className='hpu-component-blog-select-control'>
-			<SearchControl
-				ref={ searchControlRef }
-				className='blog-select-control-selector'
-				label={ props?.searchLabel || 'Select Blog' }
-				hideLabelFromVision={ false }
-				value={ searchInput }
-				onChange={ ( value ) => { console.log( value ) } }
+		<div className='hpu-select-blog-control'>
+			<ComboboxControl
+				className='hpu-select-blog-control--select'
+				label='Select Blog'
+				value={ selectedBlog || '' }
+				onChange={ ( value ) => { setSelectedBlog( value ) } }
+				onFilterValueChange={ ( value ) => { setBlogFilter( value ) } }
+				options={ options }
 				__nextHasNoMarginBottom
 			/>
-			{ isPopoverOpen && searchInput.length ? (
-				<Popover
-					anchor={ searchControlRef.current }
-					className='hpu-blog-select-control-results'
-					placement={ props?.placement || 'bottom' }
-					onClose={ () => { setIsPopoverOpen( false ) } }
-				>
-					<ul
-						className='search-results'
-						aria-live='polite'
-					>
-						{ isLoading && <Spinner /> }
-						{ ! isLoading ? (
-							<li className="search-result no-results">No Results Found. Sorry.</li>
-						) : ( null ) }
-					</ul>
-				</Popover>
-			) : ( null ) }
-			
 		</div>
 	)
 }

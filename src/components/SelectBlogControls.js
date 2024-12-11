@@ -3,7 +3,7 @@ import { ComboboxControl } from '@wordpress/components';
 import './assets/css/SelectBlogControls.scss';
 
 export function SelectBlogControls ( props ) {
-	const [ selectedBlog, setSelectedBlog ] = useState( props?.blogID || '' );
+	const [ selectedBlog, setSelectedBlog ] = useState( props?.blogID ? `${ props.blogID }` : '1' );
 	const [ blogFilter,   setBlogFilter   ] = useState( '' );
 	const [ blogList,     setBlogList     ] = useState( [] );
 	const [ options,      setOptions      ] = useState( [] );
@@ -119,7 +119,7 @@ export function SelectBlogControls ( props ) {
 			<ComboboxControl
 				className='hpu-select-blog-control--select'
 				label='Select Blog'
-				value={ selectedBlog || '' }
+				value={ selectedBlog || options[0]?.value || '1' }
 				onChange={ ( value ) => { setSelectedBlog( value ) } }
 				onFilterValueChange={ ( value ) => { setBlogFilter( value ) } }
 				options={ options }

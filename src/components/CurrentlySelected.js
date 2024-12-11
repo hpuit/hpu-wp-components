@@ -9,6 +9,7 @@ export function CurrentlySelected( { label, selectedItem, selectedItems, onRemov
 		<BaseControl
 			label={ label || 'Currently Selected' }
 			className='hpu-component-currently-selected'
+			__nextHasNoMarginBottom
 		>
 			{ selectedItems.length ? selectedItems?.map( ( item ) => (
 				<Card key={ item?.id }>

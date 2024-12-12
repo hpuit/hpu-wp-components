@@ -1,6 +1,6 @@
 {
 	"name": "@hpu-wp/components",
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"description": "Reusable React components for HPU WordPress projects.",
 	"author": "HPU Web Team",
 	"license": "GPL-2.0-or-later",
@@ -17,9 +17,10 @@
 	"scripts": {
 		"clean": "rimraf build",
 		"build": "webpack",
-		"build:clean": "npm run clean && npm run build",
+		"build:clean": "npm run npm:clean && npm run clean && npm run build",
 		"start": "webpack --watch",
 		"start:clean": "npm run clean && npm run start",
+		"npm:clean": "rm ./package-lock.json && npm install",
 		"test": "test"
 	},
 	"repository": {

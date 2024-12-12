@@ -132,6 +132,12 @@ export function PostSearchControls( props ) {
 		if ( ! blogID ) {
 			return '/';
 		}
+
+		// Check for blog path in custom blog data object
+		if ( window?.HPUCustomBlocksData?.blogs?.[ blogID ]?.path ) {
+			return HPUCustomBlocksData.blogs[ blogID ].path;
+		}
+
 		let apiBlogPath;
 
 		try {

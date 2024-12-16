@@ -1,7 +1,6 @@
 # @hpu-wp/components
 
 ## Table of Contents
-
 - [Installation](#installation)
     - [using package.json](#using-packagejson)
     - [Dependencies](#dependencies)
@@ -18,6 +17,12 @@
         - [Props](#props-1)
         - [Required](#required-1)
         - [Usage](#usage-1)
+    - [CurrentlySelected Component](#currentlyselected-component)
+        - [Features](#features-3)
+        - [Importing](#importing-3)
+        - [Props](#props-3)
+        - [Required](#required-3)
+        - [Usage](#usage-3)
     - [PostSearchControls Component](#postsearchcontrols-component)
         - [Features](#features-2)
         - [Importing](#importing-2)

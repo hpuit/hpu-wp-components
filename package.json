@@ -1,6 +1,6 @@
 {
 	"name": "@hpu-wp/components",
-	"version": "0.4.1",
+	"version": "0.5.0",
 	"description": "Reusable React components for HPU WordPress projects.",
 	"author": "HPU Web Team",
 	"license": "GPL-2.0-or-later",

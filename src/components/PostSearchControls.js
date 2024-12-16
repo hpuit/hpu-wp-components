@@ -35,6 +35,7 @@ export function PostSearchControls( props ) {
 	const postType     = props?.postType     || ( props?.apiNameSpace ? '' : 'posts' );
 	const wpNonce      = props?.wpNonce      || null;
 	const onChange     = props?.onChange     || ( () => {} );
+	const className    = ( props?.className ?? '' ) + 'hpu-post-search-control';
 
 	// Synchronize local state with props.postArray
 	useEffect(() => {
@@ -221,7 +222,7 @@ export function PostSearchControls( props ) {
 
 	// Render Component
 	return (
-		<div className='hpu-post-search-control'>
+		<div className={ className }>
 			<SearchControl
 				ref={ searchControlRef }
 				className='hpu-post-search-control--search-input'

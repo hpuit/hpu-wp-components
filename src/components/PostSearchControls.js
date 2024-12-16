@@ -3,6 +3,25 @@ import { SearchControl, Popover, Spinner } from '@wordpress/components';
 import { CurrentlySelected } from './CurrentlySelected';
 import './assets/css/PostSearchControls.scss';
 
+/**
+ * Component for controlling post search functionality.
+ *
+ * @param {Object} props - The component props.
+ * @param {Array} [props.postArray] - An array of post IDs to initialize the component with.
+ * @param {number} [props.postID] - A single post ID to initialize the component with.
+ * @param {string} [props.blogPath] - The path to the blog for API requests.
+ * @param {number} [props.blogID] - The ID of the blog for API requests.
+ * @param {string} [props.apiDomain] - The domain for the API requests.
+ * @param {string} [props.apiNameSpace] - The namespace for the API requests.
+ * @param {string} [props.postType] - The type of posts to search for.
+ * @param {string} [props.wpNonce] - The WordPress nonce for API requests.
+ * @param {Function} [props.onChange] - Callback function to handle changes in selected posts.
+ * @param {string} [props.className] - Additional class names for the component.
+ * @param {string} [props.searchLabel] - Label for the search input.
+ * @param {string} [props.selectedLabel] - Label for the selected posts section.
+ * @param {string} [props.placement] - Placement of the popover for search results.
+ */
+
 export function PostSearchControls( props ) {
 
 	// States

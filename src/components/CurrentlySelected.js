@@ -1,6 +1,16 @@
 import { Button, Flex, Card, CardBody, BaseControl } from '@wordpress/components';
 import './assets/css/CurrentlySelected.scss';
 
+/**
+ * CurrentlySelected component.
+ *
+ * @param {Object} props - Component properties.
+ * @param {string} [props.label] - The label for the control.
+ * @param {Object} [props.selectedItem] - The currently selected item (for single-select scenarios).
+ * @param {Object[]} [props.selectedItems] - The list of currently selected items (for multi-select scenarios).
+ * @param {Function} props.onRemove - Callback function to handle the removal of an item.
+ */
+
 export function CurrentlySelected( { label, selectedItem, selectedItems, onRemove } ) {
 
 	// Normalize selectedItems to handle single and multi-select scenarios

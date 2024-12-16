@@ -2,7 +2,16 @@ import { useState, useEffect } from '@wordpress/element';
 import { ComboboxControl } from '@wordpress/components';
 import './assets/css/SelectBlogControls.scss';
 
-export function SelectBlogControls ( props ) {
+/**
+ * SelectBlogControls component.
+ *
+ * @param {Object} props - Component properties.
+ * @param {string} [props.blogID] - The ID of the selected blog.
+ * @param {string} [props.apiDomain] - The API domain to fetch blogs from.
+ * @param {Function} [props.onChange] - Callback function to handle changes to the selected blog.
+ */
+
+export function SelectBlogControls( props ) {
 	const [ selectedBlog, setSelectedBlog ] = useState( props?.blogID ? `${ props.blogID }` : '1' );
 	const [ blogFilter,   setBlogFilter   ] = useState( '' );
 	const [ blogList,     setBlogList     ] = useState( [] );

@@ -1,3 +1,14 @@
+/**
+ * Component for rendering associated site controls.
+ *
+ * @param {Object} props - The component props.
+ * @param {string} [props.label] - The label for the control.
+ * @param {string} [props.className] - Additional class names for the control.
+ * @param {boolean} [props.isMultiSelect] - Whether the control allows multiple selections.
+ * @param {Array} [props.siteArray] - Array of site IDs to be pre-selected.
+ * @param {number} [props.siteID] - Single site ID to be pre-selected.
+ * @param {Function} [props.onChange] - Callback function to handle changes.
+ */
 import { BaseControl, SearchControl, CheckboxControl, ComboboxControl, Spinner } from "@wordpress/components";
 import { useEffect, useState } from "@wordpress/element";
 

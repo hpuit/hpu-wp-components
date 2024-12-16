@@ -18,7 +18,7 @@ export function AssociatedSiteControls( props ) {
 	} );
 
 	// Consts
-	const isMultiSelect = props?.isMultiSelect ?? ( props?.postArray !== undefined );
+	const isMultiSelect = props?.isMultiSelect ?? ( props?.siteArray !== undefined );
 	const className     = ( props?.className ? props.className + ' ' : '' ) + 'hpu-associated-site-control';
 	const onChange	    = props?.onChange || ( () => {} );
 

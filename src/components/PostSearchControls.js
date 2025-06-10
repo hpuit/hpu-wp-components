@@ -255,7 +255,7 @@ export function PostSearchControls( props ) {
 				<CurrentlySelected
 					label={ props?.selectedLabel || 'Selected Posts' }
 					className='hpu-post-search-control--currently-selected'
-					selectedItems={ posts.map( ( post ) => ( { name: post.title?.rendered, id: post.id } ) ) }
+					selectedItems={ posts.map( ( post ) => ( { name: ( post.title?.rendered || post?.name || 'Untitled' ), id: post.id } ) ) }
 					onRemove={ ( value ) => { removePost( value ) } }
 				/>
 			) }

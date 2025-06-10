@@ -125,7 +125,7 @@ export function PostSearchControls( props ) {
 				if ( response.ok ) {
 					const data = await response.json();
 					setQueriedPosts( data.map( ( result ) => ( {
-						label: result?.title?.rendered || 'Untitled',
+						label: result?.title?.rendered || results?.name || 'Untitled',
 						value: result.id,
 					} ) ) );
 				}

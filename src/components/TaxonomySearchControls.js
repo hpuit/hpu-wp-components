@@ -74,7 +74,8 @@ export function TaxonomySearchControls( props ) {
 		const fetchTaxonomies = async () => {
 			try {
 				const queryTaxType = taxType ? `/${ taxType }` : '';
-				const response = await fetch( `${ apiDomain }/wp-json/${ apiNameSpace }${ queryTaxType }?per_page=10` );
+				const querySearch  = searchInput ? `&search=${ encodeURIComponent( searchInput ) }` : '';
+				const response     = await fetch( `${ apiDomain }/wp-json/${ apiNameSpace }${ queryTaxType }?per_page=20${ querySearch }` );
 				if ( response.ok ) {
 					const data = await response.json();
 					return data;
@@ -96,7 +97,7 @@ export function TaxonomySearchControls( props ) {
 			const filteredTaxonomies = taxonomies.filter( ( taxonomy ) => {
 				const taxonomyLabel = `${ taxonomy.name }`;
 				return ( taxonomyLabel.toLowerCase().includes( searchInput.toLowerCase() ) && ! taxArray.includes( taxonomy.id ) );
-			} ).slice( 0, 5 );
+			} ).slice( 0, 10 );
 			setQueriedTaxonomies( [ ...selectedTaxonomies, ...filteredTaxonomies ] );
 		}
 		filterTaxonomies();

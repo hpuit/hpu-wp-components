@@ -5,8 +5,13 @@
  * @param {string} [props.label] - The label for the control.
  * @param {string} [props.className] - Additional class names for the control.
  * @param {boolean} [props.isMultiSelect] - Whether the control allows multiple selections.
- * @param {Array} [props.taxArray] - Array of taxonomy IDs to be pre-selected.
- * @param {number} [props.taxID] - Single taxonomy ID to be pre-selected.
+ * @param {string} [props.useSlugs] - Whether to use slugs instead of IDs for taxonomy values.
+ * @param {Array} [props.taxArray] - Array of taxonomy IDs (or slugs) to be pre-selected.
+ * @param {number} [props.taxID] - Single taxonomy ID (or slug) to be pre-selected.
+ * @param {string} [props.apiDomain] - The API domain to fetch taxonomies from.
+ * @param {string} [props.apiNameSpace] - The API namespace to use for fetching taxonomies.
+ * @param {string} [props.taxType] - The type of taxonomy to filter by.
+ * @param {string} [props.blogPath] - The path to the blog.
  * @param {Function} [props.onChange] - Callback function to handle changes.
  */
 import { BaseControl, SearchControl, CheckboxControl, ComboboxControl, Spinner } from "@wordpress/components";
@@ -32,19 +37,19 @@ export function TaxonomySearchControls( props ) {
 	const isMultiSelect = props?.isMultiSelect ?? ( props?.taxArray !== undefined );
 	const className     = ( props?.className ? props.className + ' ' : '' ) + 'hpu-directory-department-control';
 	const apiDomain     = props?.apiDomain    || window.location.origin;
-	// const blogPath      = props?.blogPathnull;
 	const apiNameSpace  = props?.apiNameSpace || 'wp/v2';
 	const taxType       = props?.taxType      || null;
+	const useSlugs      = props?.useSlugs     || false;
 	const onChange      = props?.onChange     || ( () => {} );
 
-	const handleChange = ( value, id ) => {
+	const handleChange = ( value ) => {
 		let updatedArray;
 
 		if ( value ) {
-			updatedArray = addValue( id );
+			updatedArray = addValue( value );
 		}
 		else {
-			updatedArray = removeValue( id );
+			updatedArray = removeValue( value );
 		}
 
 		const changeValue = isMultiSelect ? updatedArray : updatedArray[0];
@@ -52,21 +57,25 @@ export function TaxonomySearchControls( props ) {
 		setTaxArray( updatedArray );
 	}
 
-	const addValue = ( id ) => {
-		if ( isMultiSelect && taxArray.includes( id ) ) {
+	const addValue = ( key ) => {
+		if ( isMultiSelect && taxArray.includes( key ) ) {
 			return;
 		}
-		const updatedArray = isMultiSelect ? [ ...taxArray, id ] : [ id ];
+		const updatedArray = isMultiSelect ? [ ...taxArray, key ] : [ key ];
 		return updatedArray;
 	}
 
-	const removeValue = ( id ) => {
-		const updatedArray = isMultiSelect ? taxArray.filter( ( value ) => value !== id ) : [];
+	const removeValue = ( key ) => {
+		const updatedArray = isMultiSelect ? taxArray.filter( ( tax ) => tax !== key ) : [];
 		return updatedArray;
 	}
 
 	const handleSearchInputChange = ( value ) => {
 		setSearchInput( value );
+	}
+
+	const getTaxKey = ( tax ) => {
+		return useSlugs ? tax.slug : tax.id;
 	}
 
 	useEffect( () => {
@@ -75,7 +84,7 @@ export function TaxonomySearchControls( props ) {
 			try {
 				const queryTaxType = taxType ? `/${ taxType }` : '';
 				const querySearch  = searchInput ? `&search=${ encodeURIComponent( searchInput ) }` : '';
-				const response     = await fetch( `${ apiDomain }/wp-json/${ apiNameSpace }${ queryTaxType }?per_page=20${ querySearch }` );
+				const response     = await fetch( `${ apiDomain }/wp-json/${ apiNameSpace }${ queryTaxType }?per_page=10${ querySearch }` );
 				if ( response.ok ) {
 					const data = await response.json();
 					return data;
@@ -92,11 +101,11 @@ export function TaxonomySearchControls( props ) {
 		const filterTaxonomies = async () => {
 			const taxonomies         = await fetchTaxonomies();
 			const selectedTaxonomies = taxonomies.filter( ( taxonomy ) => {
-				return taxArray.includes( taxonomy.id );
+				return taxArray.includes( getTaxKey( taxonomy ) );
 			} );
 			const filteredTaxonomies = taxonomies.filter( ( taxonomy ) => {
 				const taxonomyLabel = `${ taxonomy.name }`;
-				return ( taxonomyLabel.toLowerCase().includes( searchInput.toLowerCase() ) && ! taxArray.includes( taxonomy.id ) );
+				return ( taxonomyLabel.toLowerCase().includes( searchInput.toLowerCase() ) && ! taxArray.includes( getTaxKey( taxonomy ) ) );
 			} ).slice( 0, 10 );
 			setQueriedTaxonomies( [ ...selectedTaxonomies, ...filteredTaxonomies ] );
 		}
@@ -122,10 +131,10 @@ export function TaxonomySearchControls( props ) {
 					/>
 					{ queriedTaxonomies && queriedTaxonomies.map( ( tax ) => (
 						<CheckboxControl
-							key={ tax.id }
+							key={ getTaxKey( tax ) }
 							label={ `${ tax.name }` }
-							onChange={ ( value ) => { handleChange( value, tax.id ) } }
-							checked={ taxArray.includes( tax.id ) }
+							onChange={ ( value ) => { handleChange( value ) } }
+							checked={ taxArray.includes( getTaxKey( tax ) ) }
 							__nextHasNoMarginBottom
 						/>
 					) ) }
@@ -138,7 +147,7 @@ export function TaxonomySearchControls( props ) {
 					value={ taxArray[0] }
 					onChange={ ( value ) => { handleChange( value, value ) } }
 					onFilterValueChange={ handleSearchInputChange }
-					options={ queriedTaxonomies.map( ( tax ) => ( { value: tax.id, label: `${ tax.name }` } ) ) }
+					options={ queriedTaxonomies.map( ( tax ) => ( { value: getTaxKey( tax ), label: `${ tax.name }` } ) ) }
 					__nextHasNoMarginBottom
 				/>
 			) }

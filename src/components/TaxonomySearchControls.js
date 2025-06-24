@@ -42,14 +42,14 @@ export function TaxonomySearchControls( props ) {
 	const useSlugs      = props?.useSlugs     || false;
 	const onChange      = props?.onChange     || ( () => {} );
 
-	const handleChange = ( value ) => {
+	const handleChange = ( value, key ) => {
 		let updatedArray;
 
 		if ( value ) {
-			updatedArray = addValue( value );
+			updatedArray = addValue( key );
 		}
 		else {
-			updatedArray = removeValue( value );
+			updatedArray = removeValue( key );
 		}
 
 		const changeValue = isMultiSelect ? updatedArray : updatedArray[0];
@@ -133,7 +133,7 @@ export function TaxonomySearchControls( props ) {
 						<CheckboxControl
 							key={ getTaxKey( tax ) }
 							label={ `${ tax.name }` }
-							onChange={ ( value ) => { handleChange( value ) } }
+							onChange={ ( value ) => { handleChange( value, getTaxKey( tax ) ) } }
 							checked={ taxArray.includes( getTaxKey( tax ) ) }
 							__nextHasNoMarginBottom
 						/>

@@ -16,6 +16,7 @@
  */
 import { BaseControl, SearchControl, CheckboxControl, ComboboxControl, Spinner } from "@wordpress/components";
 import { useEffect, useState } from "@wordpress/element";
+import './assets/css/TaxonomySearchControls.scss';
 
 export function TaxonomySearchControls( props ) {
 

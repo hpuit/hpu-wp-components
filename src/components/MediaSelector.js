@@ -27,11 +27,10 @@ import './assets/css/CurrentlySelected.scss';
 
 export function MediaSelector( props ) {
 	const label        = props?.label     || 'Media Selector';
-	const mediaType    = props?.mediaType || 'image';
-	const typeLabel    = props?.typeLabel || mediaType.charAt( 0 ).toUpperCase() + mediaType.slice( 1 );
 	const allowUrl     = props?.allowUrl  || false;
 	const mediaUrl     = props?.mediaUrl  || null;
 	const fileName     = mediaUrl ? mediaUrl.split( '/' ).pop() : '';
+	const mediaLabel   = props?.typeLabel || 'Media';
 	const handleChange = ( newValue ) => {
 		if ( 'function' === typeof props.onChange ) {
 			props.onChange( newValue );
@@ -48,6 +47,20 @@ export function MediaSelector( props ) {
 	const urlDialog = () => {
 		alert( 'URL dialog not implemented yet' );
 	}
+	const getMediaType = () => {
+		if ( 'string' === typeof props?.mediaType ) {
+			return [ props.mediaType ];
+		}
+		if ( Array.isArray( props?.mediaType ) ) {
+			return props.mediaType;
+		}
+		return [ 'image' ];
+	}
+	const getAllowedList = () => {
+		return mediaType.join( '/*, ' ) + '/*';
+	}
+	const mediaType	   = getMediaType();
+	const allowedList  = getAllowedList();
 
 	return (
 		<BaseControl
@@ -98,8 +111,8 @@ export function MediaSelector( props ) {
 							onSelect={ ( media ) => {
 								handleChange( media.url );
 							} }
-							accept={ `${ mediaType }/*` }
-							allowedTypes={ [ mediaType ] }
+							accept={ allowedList }
+							allowedTypes={ mediaType }
 							render={ ( { open } ) => (
 								<>
 									<FormFileUpload

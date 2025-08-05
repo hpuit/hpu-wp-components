@@ -74,7 +74,7 @@ export function MediaSelector( props ) {
 						<Tooltip
 							text={ fileName }
 						>
-							{ 'image' === mediaType ? (
+							{ mediaUrl?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
 								<img
 									src={ mediaUrl }
 									alt={ fileName }

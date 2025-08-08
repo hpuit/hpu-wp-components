@@ -14,26 +14,29 @@ import './assets/css/CurrentlySelected.scss';
 /**
  * CurrentlySelected component.\
  *
- * @param { Object   }   props             - Component properties.
- * @param { string   } [ props.label     ] - The label for the control.
- * @param { string   } [ props.className ] - Additional class names for the control.
- * @param { string   } [ props.type      ] - The type of media (image or video).
- * @param { string   } [ props.typeLabel ] - The label for the type of media.
- * @param { boolean  } [ props.allowUrl  ] - Whether to allow URL input.
- * @param { string   } [ props.mediaUrl  ] - The URL of the media item.
- * @param { Function } [ props.onChange  ] - Callback function to handle changes.
- * @param { Function } [ props.onClear   ] - Callback function to handle clearing the selection.
+ * @param { Object   }   props                - Component properties.
+ * @param { string   } [ props.label        ] - The label for the control.
+ * @param { string   } [ props.className    ] - Additional class names for the control.
+ * @param { string   } [ props.type         ] - The type of media (image or video).
+ * @param { string   } [ props.typeLabel    ] - The label for the type of media.
+ * @param { boolean  } [ props.allowUrl     ] - Whether to allow URL input.
+ * @param { boolean  } [ props.returnObject ] - Whether to return the media object, else will return the media URL.
+ * @param { string   } [ props.mediaUrl     ] - The URL of the media item.
+ * @param { Function } [ props.onChange     ] - Callback function to handle changes.
+ * @param { Function } [ props.onClear      ] - Callback function to handle clearing the selection.
  */
 
 export function MediaSelector( props ) {
-	const label        = props?.label     || 'Media Selector';
-	const allowUrl     = props?.allowUrl  || false;
-	const mediaUrl     = props?.mediaUrl  || null;
+	const label        = props?.label        || 'Media Selector';
+	const allowUrl     = props?.allowUrl     || false;
+	const mediaUrl     = props?.mediaUrl     || null;
 	const fileName     = mediaUrl ? mediaUrl.split( '/' ).pop() : '';
-	const mediaLabel   = props?.typeLabel || 'Media';
+	const mediaLabel   = props?.typeLabel    || 'Media';
+	const returnObject = props?.returnObject || false;
 	const handleChange = ( newValue ) => {
 		if ( 'function' === typeof props.onChange ) {
-			props.onChange( newValue );
+			const changeValue = returnObject ? newValue : newValue?.url;
+			props.onChange( changeValue );
 		}
 	};
 	const handleClear = () => {
@@ -109,18 +112,18 @@ export function MediaSelector( props ) {
 					<MediaUploadCheck>
 						<MediaUpload
 							onSelect={ ( media ) => {
-								handleChange( media.url );
+								handleChange( media );
 							} }
 							accept={ allowedList }
 							allowedTypes={ mediaType }
 							render={ ( { open } ) => (
 								<>
 									<FormFileUpload
-										label={ `Upload ${ typeLabel }` }
+										label={ `Upload ${ mediaLabel }` }
 										onChange={ open }
 										variant='primary'
 									>
-										{ `Upload ${ typeLabel }` }
+										{ `Upload ${ mediaLabel }` }
 									</FormFileUpload>
 									<div>
 										<Button

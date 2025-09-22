@@ -35,8 +35,7 @@ export function PostSearchControls( props ) {
 		console.warn( 'The postID prop is deprecated since version 0.6.0 - Please use the value prop instead.' );
 	}
 
-	// States
-	const [ postArray, setPostArray ] = useState( () => {
+	const getValueAsArray = () => {
 		if ( props?.value ) {
 			return Array.isArray( props.value ) ? props.value : [ props.value ];
 		}
@@ -47,7 +46,10 @@ export function PostSearchControls( props ) {
 			return [ props.postID ];
 		}
 		return [];
-	} );
+	}
+
+	// States
+	const [ postArray,       setPostArray.      ] = useState( getValueAsArray() || [] );
 	const [ posts,           setPosts           ] = useState( null );
 	const [ isLoading,       setIsLoading       ] = useState( false );
 	const [ isPopoverOpen,   setIsPopoverOpen   ] = useState( false );
@@ -70,11 +72,9 @@ export function PostSearchControls( props ) {
 	const className    = ( props?.className ?? '' ) + 'hpu-post-search-control';
 
 	// Synchronize local state with props.postArray
-	useEffect(() => {
-		if (props?.postArray && Array.isArray(props.postArray)) {
-			setPostArray(props.postArray); // Update local state when props.postArray changes
-		}
-	}, [props.postArray]);
+	useEffect( () => {
+		setPostArray( getValueAsArray() );
+	}, [ props.value, props.postArray, props.postID ] );
 
 	// close out the popover when the api settings change
 	useEffect( () => {

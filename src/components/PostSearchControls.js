@@ -71,7 +71,7 @@ export function PostSearchControls( props ) {
 	const onChange     = props?.onChange     || ( () => {} );
 	const className    = ( props?.className ?? '' ) + 'hpu-post-search-control';
 
-	// Synchronize local state with props.postArray
+	// Synchronize local state with props.value changes
 	useEffect( () => {
 		setPostArray( getValueAsArray() );
 	}, [ props.value, props.postArray, props.postID ] );

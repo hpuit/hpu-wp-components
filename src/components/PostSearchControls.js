@@ -8,6 +8,7 @@ import './assets/css/PostSearchControls.scss';
  *
  * @param {Object} props - The component props.
  * @param {number|number[]} props.value - The current selected value(s).
+ * @param {boolean} [props.multiple] - Whether multiple selections are allowed.
  * @param {Array} [props.postArray] - An array of post IDs to initialize the component with.
  * @deprecated props.postArray is deprecated since version 0.6.0. Use props.value instead.
  * @param {number} [props.postID] - A single post ID to initialize the component with.
@@ -61,7 +62,7 @@ export function PostSearchControls( props ) {
 	const searchDebounceTimeout = useRef( null );
 
 	// Constants
-	const isMultiPost  = ( props?.postArray !== undefined );
+	const isMultiPost  = props?.multiple     || ( props?.postArray !== undefined );
 	const blogPath     = props?.blogPath     || null;
 	const blogID       = props?.blogID       || null;
 	const apiDomain    = props?.apiDomain    || window.location.origin;

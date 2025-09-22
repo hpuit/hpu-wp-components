@@ -5,8 +5,11 @@
  * @param {string} [props.label] - The label for the control.
  * @param {string} [props.className] - Additional class names for the control.
  * @param {boolean} [props.isMultiSelect] - Whether the control allows multiple selections.
+ * @param {number|number[]} [props.value] - The current selected value(s).
  * @param {Array} [props.siteArray] - Array of site IDs to be pre-selected.
+ * @deprecated props.siteArray is deprecated since 0.6 - Use value prop instread.
  * @param {number} [props.siteID] - Single site ID to be pre-selected.
+ * @deprecated props.siteID is deprecated since 0.6 - Use value prop instread.
  * @param {Function} [props.onChange] - Callback function to handle changes.
  */
 import { BaseControl, SearchControl, CheckboxControl, ComboboxControl, Spinner } from "@wordpress/components";
@@ -27,6 +30,29 @@ export function AssociatedSiteControls( props ) {
 		}
 		return [];
 	} );
+
+	// Handle deprecated propse
+	if ( props?.siteArray ) {
+		console.warn( 'The siteArray prop is deprecated since version 0.6. Please use the value prop and isMultiSelect prop instead.' );
+	}
+	if ( props?.siteID ) {
+		console.warn( 'The siteID prop is deprecated since version 0.6. Please use the value prop instead.' );
+	}
+
+	// Update state if props.value changes
+	useEffect( () => {
+		if ( props?.value !== undefined ) {
+			if ( Array.isArray( props.value ) ) {
+				setSiteArray( props.value );
+			}
+			else if ( typeof props.value === 'number' ) {
+				setSiteArray( [ props.value ] );
+			}
+			else {
+				setSiteArray( [] );
+			}
+		}
+	}, [ props?.value ] );
 
 	// Consts
 	const isMultiSelect = props?.isMultiSelect ?? ( props?.siteArray !== undefined );

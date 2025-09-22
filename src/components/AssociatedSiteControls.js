@@ -4,7 +4,9 @@
  * @param {Object} props - The component props.
  * @param {string} [props.label] - The label for the control.
  * @param {string} [props.className] - Additional class names for the control.
+ * @param {boolean} [props.multiple] - Whether the control allows multiple selections.
  * @param {boolean} [props.isMultiSelect] - Whether the control allows multiple selections.
+ * @deprecated props.isMultiSelect is deprecated since version 0.6.0 - Use multiple prop instead.
  * @param {number|number[]} [props.value] - The current selected value(s).
  * @param {Array} [props.siteArray] - Array of site IDs to be pre-selected.
  * @deprecated props.siteArray is deprecated since version 0.6.0 - Use value prop instead.
@@ -38,6 +40,9 @@ export function AssociatedSiteControls( props ) {
 	if ( props?.siteID ) {
 		console.warn( 'The siteID prop is deprecated since version 0.6.0 - Please use the value prop instead.' );
 	}
+	if ( props?.isMultiSelect ) {
+		console.warn( 'The isMultiSelect prop is deprecated since version 0.6.0 - Please use the multiple prop instead.' );
+	}
 
 	// Update state if props.value changes
 	useEffect( () => {
@@ -55,7 +60,7 @@ export function AssociatedSiteControls( props ) {
 	}, [ props?.value ] );
 
 	// Consts
-	const isMultiSelect = props?.isMultiSelect ?? ( props?.siteArray !== undefined );
+	const isMultiSelect = props?.multiple ?? props?.isMultiSelect ?? ( props?.siteArray !== undefined );
 	const className     = ( props?.className ? props.className + ' ' : '' ) + 'hpu-associated-site-control';
 	const onChange	    = props?.onChange || ( () => {} );
 

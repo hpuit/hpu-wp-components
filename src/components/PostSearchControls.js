@@ -51,7 +51,6 @@ export function PostSearchControls( props ) {
 	const [ posts,           setPosts           ] = useState( null );
 	const [ isLoading,       setIsLoading       ] = useState( false );
 	const [ isPopoverOpen,   setIsPopoverOpen   ] = useState( false );
-	const [ isSearchFocused, setIsSearchFocused ] = useState( false );
 	const [ searchInput,     setSearchInput     ] = useState( '' );
 	const [ queriedPosts,    setQueriedPosts    ] = useState( [] );
 

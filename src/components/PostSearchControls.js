@@ -49,7 +49,7 @@ export function PostSearchControls( props ) {
 	}
 
 	// States
-	const [ postArray,       setPostArray.      ] = useState( getValueAsArray() || [] );
+	const [ postArray,       setPostArray       ] = useState( getValueAsArray() || [] );
 	const [ posts,           setPosts           ] = useState( null );
 	const [ isLoading,       setIsLoading       ] = useState( false );
 	const [ isPopoverOpen,   setIsPopoverOpen   ] = useState( false );

@@ -7,8 +7,11 @@ import './assets/css/PostSearchControls.scss';
  * Component for controlling post search functionality.
  *
  * @param {Object} props - The component props.
+ * @param {number|number[]} props.value - The current selected value(s).
  * @param {Array} [props.postArray] - An array of post IDs to initialize the component with.
+ * @deprecated props.postArray is deprecated since version 0.6.0. Use props.value instead.
  * @param {number} [props.postID] - A single post ID to initialize the component with.
+ * @deprecated props.postID is deprecated since version 0.6.0. Use props.value instead.
  * @param {string} [props.blogPath] - The path to the blog for API requests.
  * @param {number} [props.blogID] - The ID of the blog for API requests.
  * @param {string} [props.apiDomain] - The domain for the API requests.
@@ -24,9 +27,20 @@ import './assets/css/PostSearchControls.scss';
 
 export function PostSearchControls( props ) {
 
+	// Handle deprecated props
+	if ( props.postArray ) {
+		console.warn( 'The postArray prop is deprecated since version 0.6.0 - Please use the value prop instead.' );
+	}
+	if ( props.postID ) {
+		console.warn( 'The postID prop is deprecated since version 0.6.0 - Please use the value prop instead.' );
+	}
+
 	// States
 	const [ postArray, setPostArray ] = useState( () => {
-		if ( props?.postArray && Array.isArray( props?.postArray ) ) {
+		if ( props?.value ) {
+			return Array.isArray( props.value ) ? props.value : [ props.value ];
+		}
+		else if ( props?.postArray && Array.isArray( props?.postArray ) ) {
 			return props.postArray;
 		}
 		else if ( props?.postID ) {

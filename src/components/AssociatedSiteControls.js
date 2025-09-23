@@ -36,7 +36,7 @@ export function AssociatedSiteControls( props ) {
 		return [];
 	} );
 
-	// Handle deprecated propse
+	// Handle deprecated props
 	if ( props?.siteArray ) {
 		console.warn( 'The siteArray prop is deprecated since version 0.6.0 - Please use the value prop and isMultiSelect prop instead.' );
 	}

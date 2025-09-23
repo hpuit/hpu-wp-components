@@ -40,7 +40,7 @@ export function PostSearchControls( props ) {
 		if ( props?.value ) {
 			return Array.isArray( props.value ) ? props.value : [ props.value ];
 		}
-		else if ( props?.postArray && Array.isArray( props?.postArray ) ) {
+		else if ( Array.isArray( props?.postArray ) ) {
 			return props.postArray;
 		}
 		else if ( props?.postID ) {

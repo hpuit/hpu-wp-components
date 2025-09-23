@@ -5,14 +5,14 @@
  * @param {string} [props.label] - The label for the control.
  * @param {string} [props.className] - Additional class names for the control.
  * @param {boolean} [props.multiple] - Whether the control allows multiple selections.
- * @param {boolean} [props.isMultiSelect] - Whether the control allows multiple selections.
- * @deprecated props.isMultiSelect is deprecated since version 0.6.0 - Use multiple prop instead.
  * @param {number|number[]} [props.value] - The current selected value(s).
+ * @param {boolean} [props.isMultiSelect] - Whether the control allows multiple selections.
+ * @param {Function} [props.onChange] - Callback function to handle changes.
+ * @deprecated props.isMultiSelect is deprecated since version 0.6.0 - Use multiple prop instead.
  * @param {Array} [props.siteArray] - Array of site IDs to be pre-selected.
  * @deprecated props.siteArray is deprecated since version 0.6.0 - Use value prop instead.
  * @param {number} [props.siteID] - Single site ID to be pre-selected.
  * @deprecated props.siteID is deprecated since version 0.6.0 - Use value prop instread.
- * @param {Function} [props.onChange] - Callback function to handle changes.
  */
 import { BaseControl, SearchControl, CheckboxControl, ComboboxControl, Spinner } from "@wordpress/components";
 import { useEffect, useState } from "@wordpress/element";

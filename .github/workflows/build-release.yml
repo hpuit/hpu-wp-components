@@ -48,7 +48,7 @@ jobs:
             --exclude='package*'
             --exclude='webpack*'
             --exclude='src'
-          -czf "${{ env.ARTIFACT }}"
+            -czf "${{ env.ARTIFACT }}" .
 
       - name: 'RELEASE: Create'
         id: create-new-release

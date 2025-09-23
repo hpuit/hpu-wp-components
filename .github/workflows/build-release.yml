@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - prod
-      - feature/workflow-improvements-tar-exclude
 
 permissions:
   contents: write

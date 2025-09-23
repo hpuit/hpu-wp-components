@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - prod
+      - feature/workflow-gh-cli-release
 
 permissions:
   contents: write

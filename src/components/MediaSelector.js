@@ -1,3 +1,17 @@
+/**
+ * CurrentlySelected component.
+ *
+ * @param {Object} props - Component properties.
+ * @param {string} [props.label] - The label for the control.
+ * @param {string} [props.className] - Additional class names for the control.
+ * @param {string} [props.type] - The type of media (image or video).
+ * @param {string} [props.typeLabel] - The label for the type of media.
+ * @param {boolean} [props.allowUrl] - Whether to allow URL input.
+ * @param {boolean} [props.returnObject] - Whether to return the media object, else will return the media URL.
+ * @param {string} [props.mediaUrl] - The URL of the media item.
+ * @param {Function} [props.onChange] - Callback function to handle changes.
+ * @param {Function} [props.onClear] - Callback function to handle clearing the selection.
+ */
 import {
 	BaseControl,
 	Button,
@@ -10,21 +24,6 @@ import {
 	MediaUploadCheck,
 } from '@wordpress/block-editor';
 import './assets/css/CurrentlySelected.scss';
-
-/**
- * CurrentlySelected component.\
- *
- * @param { Object   }   props                - Component properties.
- * @param { string   } [ props.label        ] - The label for the control.
- * @param { string   } [ props.className    ] - Additional class names for the control.
- * @param { string   } [ props.type         ] - The type of media (image or video).
- * @param { string   } [ props.typeLabel    ] - The label for the type of media.
- * @param { boolean  } [ props.allowUrl     ] - Whether to allow URL input.
- * @param { boolean  } [ props.returnObject ] - Whether to return the media object, else will return the media URL.
- * @param { string   } [ props.mediaUrl     ] - The URL of the media item.
- * @param { Function } [ props.onChange     ] - Callback function to handle changes.
- * @param { Function } [ props.onClear      ] - Callback function to handle clearing the selection.
- */
 
 export function MediaSelector( props ) {
 	const label        = props?.label        || 'Media Selector';

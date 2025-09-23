@@ -56,7 +56,7 @@ jobs:
           gh release create "${{ env.VERSION }}" "./${{ env.ARTIFACT }}" \
             --title "${{ env.VERSION }}" \
             --notes "Release of version ${{ env.VERSION }}" \
-            --repo "hpuit/${{ github.repository }}" \
+            --repo "${{ github.repository }}" \
             --draft=false \
             --prerelease=false
         env:

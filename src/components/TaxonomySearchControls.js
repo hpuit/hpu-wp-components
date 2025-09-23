@@ -4,15 +4,20 @@
  * @param {Object} props - The component props.
  * @param {string} [props.label] - The label for the control.
  * @param {string} [props.className] - Additional class names for the control.
- * @param {boolean} [props.isMultiSelect] - Whether the control allows multiple selections.
  * @param {string} [props.useSlugs] - Whether to use slugs instead of IDs for taxonomy values.
- * @param {Array} [props.taxArray] - Array of taxonomy IDs (or slugs) to be pre-selected.
- * @param {number} [props.taxID] - Single taxonomy ID (or slug) to be pre-selected.
  * @param {string} [props.apiDomain] - The API domain to fetch taxonomies from.
  * @param {string} [props.apiNameSpace] - The API namespace to use for fetching taxonomies.
  * @param {string} [props.taxType] - The type of taxonomy to filter by.
  * @param {string} [props.blogPath] - The path to the blog.
+ * @param {number|number[]} [props.value] - The current selected value(s).
+ * @param {Boolean} [props.multiple] - Whether the control allows multiple selections.
  * @param {Function} [props.onChange] - Callback function to handle changes.
+ * @param {boolean} [props.isMultiSelect] - Whether the control allows multiple selections.
+ * @deprecated props.isMultiSelect is deprecated since v0.6.0 - Use props.multiple instead.
+ * @param {Array} [props.taxArray] - Array of taxonomy IDs (or slugs) to be pre-selected.
+ * @deprecated props.taxArray is deprecated since v0.6.0 - Use props.value with props.multiple instead.
+ * @param {number} [props.taxID] - Single taxonomy ID (or slug) to be pre-selected.
+ * @deprecated props.taxID is deprecated since v0.6.0 - Use props.value instead.
  */
 import { BaseControl, SearchControl, CheckboxControl, ComboboxControl, Spinner } from "@wordpress/components";
 import { useEffect, useState } from "@wordpress/element";
@@ -20,12 +25,26 @@ import './assets/css/TaxonomySearchControls.scss';
 
 export function TaxonomySearchControls( props ) {
 
+	// Handle deprecated props
+	if ( props.isMultiSelect ) {
+		console.warn( 'The isMultiSelect prop is deprecated since version 0.6. Please use the multiple prop instead.' );
+	}
+	if ( props.taxArray ) {
+		console.warn( 'The taxArray prop is deprecated since version 0.6. Please use the value prop with multiple instead.' );
+	}
+	if ( props.taxID ) {
+		console.warn( 'The taxID prop is deprecated since version 0.6. Please use the value prop instead.' );
+	}
+
 	// States
 	const [ isLoading,         setIsLoading         ] = useState( true );
 	const [ searchInput,       setSearchInput       ] = useState( '' );
 	const [ queriedTaxonomies, setQueriedTaxonomies ] = useState( [] );
 	const [ taxArray,          setTaxArray          ] = useState( () => {
-		if ( props?.taxArray && Array.isArray( props?.taxArray ) ) {
+		if ( props?.value !== undefined ) {
+			return Array.isArray( props.value ) ? props.value : [ props.value ];
+		}
+		else if ( props?.taxArray && Array.isArray( props?.taxArray ) ) {
 			return props.taxArray;
 		}
 		else if ( props?.taxID ) {
@@ -35,7 +54,7 @@ export function TaxonomySearchControls( props ) {
 	} );
 
 	// Consts
-	const isMultiSelect = props?.isMultiSelect ?? ( props?.taxArray !== undefined );
+	const isMultiSelect = props?.multiple ?? props?.isMultiSelect ?? ( props?.taxArray !== undefined );
 	const className     = ( props?.className ? props.className + ' ' : '' ) + 'hpu-directory-department-control';
 	const apiDomain     = props?.apiDomain    || window.location.origin;
 	const apiNameSpace  = props?.apiNameSpace || 'wp/v2';

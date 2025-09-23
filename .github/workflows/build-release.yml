@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - prod
+      - feature/github-workflow
 
 permissions:
   contents: write

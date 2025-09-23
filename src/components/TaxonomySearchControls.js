@@ -55,7 +55,7 @@ export function TaxonomySearchControls( props ) {
 
 	// Consts
 	const isMultiSelect = props?.multiple ?? props?.isMultiSelect ?? ( props?.taxArray !== undefined );
-	const className     = ( props?.className ? props.className + ' ' : '' ) + 'hpu-directory-department-control';
+	const className     = ( props?.className ? props.className + ' ' : '' ) + 'hpu-taxonomy-search-control';
 	const apiDomain     = props?.apiDomain    || window.location.origin;
 	const apiNameSpace  = props?.apiNameSpace || 'wp/v2';
 	const taxType       = props?.taxType      || null;

@@ -9,10 +9,6 @@ import './assets/css/PostSearchControls.scss';
  * @param {Object} props - The component props.
  * @param {number|number[]} props.value - The current selected value(s).
  * @param {boolean} [props.multiple] - Whether multiple selections are allowed.
- * @param {Array} [props.postArray] - An array of post IDs to initialize the component with.
- * @deprecated props.postArray is deprecated since version 0.6.0. Use props.value instead.
- * @param {number} [props.postID] - A single post ID to initialize the component with.
- * @deprecated props.postID is deprecated since version 0.6.0. Use props.value instead.
  * @param {string} [props.blogPath] - The path to the blog for API requests.
  * @param {number} [props.blogID] - The ID of the blog for API requests.
  * @param {string} [props.apiDomain] - The domain for the API requests.
@@ -24,6 +20,10 @@ import './assets/css/PostSearchControls.scss';
  * @param {string} [props.searchLabel] - Label for the search input.
  * @param {string} [props.selectedLabel] - Label for the selected posts section.
  * @param {string} [props.placement] - Placement of the popover for search results.
+ * @param {Array} [props.postArray] - An array of post IDs to initialize the component with.
+ * @deprecated props.postArray is deprecated since version 0.6.0. Use props.value instead.
+ * @param {number} [props.postID] - A single post ID to initialize the component with.
+ * @deprecated props.postID is deprecated since version 0.6.0. Use props.value instead.
  */
 
 export function PostSearchControls( props ) {

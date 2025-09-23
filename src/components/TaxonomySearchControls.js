@@ -13,11 +13,11 @@
  * @param {Boolean} [props.multiple] - Whether the control allows multiple selections.
  * @param {Function} [props.onChange] - Callback function to handle changes.
  * @param {boolean} [props.isMultiSelect] - Whether the control allows multiple selections.
- * @deprecated props.isMultiSelect is deprecated since v0.6.0 - Use props.multiple instead.
+ * @deprecated props.isMultiSelect is deprecated since version 0.6.1 - Use props.multiple instead.
  * @param {Array} [props.taxArray] - Array of taxonomy IDs (or slugs) to be pre-selected.
- * @deprecated props.taxArray is deprecated since v0.6.0 - Use props.value with props.multiple instead.
+ * @deprecated props.taxArray is deprecated since version 0.6.1 - Use props.value with props.multiple instead.
  * @param {number} [props.taxID] - Single taxonomy ID (or slug) to be pre-selected.
- * @deprecated props.taxID is deprecated since v0.6.0 - Use props.value instead.
+ * @deprecated props.taxID is deprecated since version 0.6.1 - Use props.value instead.
  */
 import { BaseControl, SearchControl, CheckboxControl, ComboboxControl, Spinner } from "@wordpress/components";
 import { useEffect, useState } from "@wordpress/element";

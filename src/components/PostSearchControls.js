@@ -21,19 +21,19 @@ import './assets/css/PostSearchControls.scss';
  * @param {string} [props.selectedLabel] - Label for the selected posts section.
  * @param {string} [props.placement] - Placement of the popover for search results.
  * @param {Array} [props.postArray] - An array of post IDs to initialize the component with.
- * @deprecated props.postArray is deprecated since version 0.6.0. Use props.value instead.
+ * @deprecated props.postArray is deprecated since version 0.6.1. Use props.value instead.
  * @param {number} [props.postID] - A single post ID to initialize the component with.
- * @deprecated props.postID is deprecated since version 0.6.0. Use props.value instead.
+ * @deprecated props.postID is deprecated since version 0.6.1. Use props.value instead.
  */
 
 export function PostSearchControls( props ) {
 
 	// Handle deprecated props
 	if ( props.postArray ) {
-		console.warn( 'The postArray prop is deprecated since version 0.6.0 - Please use the value prop instead.' );
+		console.warn( 'The postArray prop is deprecated since version 0.6.1 - Please use the value prop instead.' );
 	}
 	if ( props.postID ) {
-		console.warn( 'The postID prop is deprecated since version 0.6.0 - Please use the value prop instead.' );
+		console.warn( 'The postID prop is deprecated since version 0.6.1 - Please use the value prop instead.' );
 	}
 
 	const getValueAsArray = () => {

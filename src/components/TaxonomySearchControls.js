@@ -44,7 +44,7 @@ export function TaxonomySearchControls( props ) {
 		if ( props?.value !== undefined ) {
 			return Array.isArray( props.value ) ? props.value : [ props.value ];
 		}
-		else if ( props?.taxArray && Array.isArray( props?.taxArray ) ) {
+		else if ( Array.isArray( props?.taxArray ) ) {
 			return props.taxArray;
 		}
 		else if ( props?.taxID ) {

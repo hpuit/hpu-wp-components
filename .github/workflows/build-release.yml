@@ -1,0 +1,66 @@
+name: build-release
+run-name: Release of ${{ github.repository }} by ${{ github.actor }}
+on:
+  push:
+    branches:
+      - prod
+
+permissions:
+  contents: write
+
+jobs:
+  build-release-actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+
+      - name: 'BUILD: Composer + NPM'
+        run:
+          npm install &&
+          npm run build
+
+      - name: 'PACKAGE: Artifact Name'
+        run:
+          repo=${{ github.repository }} &&
+          repo=${{repo#"hpuit/"}} &&
+          artifact="${repo}.tar.gz" &&
+          echo "ARTIFACT=${artifact}" >> $GITHUB_ENV
+
+      - name: 'PACKAGE: Release Number'
+        run:
+          version=$(<VERSION.md).${{ github.run_number }} &&
+          echo "VERSION=${version}" >> $GITHUB_ENV
+
+      - name: 'PACKAGE: Artifact File'
+        run:
+          rm -rf
+            *.md
+            .git*
+            .github
+            node_modules
+            output.log
+            package*
+            webpack*
+            src &&
+          tar cf - * | gzip -c > "${{ env.ARTIFACT }}"
+
+      - name: 'RELEASE: Create'
+        id: create-new-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: ${{ env.VERSION }}
+
+      - name: 'RELEASE: Upload'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-new-release.outputs.upload_url }}
+          asset_path: ./${{ env.ARTIFACT }}
+          asset_name: ${{ env.ARTIFACT }}
+          asset_content_type: application/tar+gzip

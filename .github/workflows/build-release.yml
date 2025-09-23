@@ -27,7 +27,7 @@ jobs:
       - name: 'PACKAGE: Artifact Name'
         run:
           repo=${{ github.repository }} &&
-          repo=${{repo#"hpuit/"}} &&
+          repo=${repo#"hpuit/"} &&
           artifact="${repo}.tar.gz" &&
           echo "ARTIFACT=${artifact}" >> $GITHUB_ENV
 

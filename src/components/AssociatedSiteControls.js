@@ -24,7 +24,10 @@ export function AssociatedSiteControls( props ) {
 	const [ searchInput,   setSearchInput   ] = useState( '' );
 	const [ queriedSites,  setQueriedSites  ] = useState( [] );
 	const [ siteArray,     setSiteArray     ] = useState( () => {
-		if ( props?.siteArray && Array.isArray( props?.siteArray ) ) {
+		if ( props?.value !== undefined ) {
+			return Array.isArray( props.value ) ? props.value : [ props.value ];
+		}
+		else if ( Array.isArray( props?.siteArray ) ) {
 			return props.siteArray;
 		}
 		else if ( props?.siteID ) {

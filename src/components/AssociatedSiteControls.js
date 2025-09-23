@@ -8,11 +8,11 @@
  * @param {number|number[]} [props.value] - The current selected value(s).
  * @param {boolean} [props.isMultiSelect] - Whether the control allows multiple selections.
  * @param {Function} [props.onChange] - Callback function to handle changes.
- * @deprecated props.isMultiSelect is deprecated since version 0.6.0 - Use multiple prop instead.
+ * @deprecated props.isMultiSelect is deprecated since version 0.6.1 - Use multiple prop instead.
  * @param {Array} [props.siteArray] - Array of site IDs to be pre-selected.
- * @deprecated props.siteArray is deprecated since version 0.6.0 - Use value prop instead.
+ * @deprecated props.siteArray is deprecated since version 0.6.1 - Use value prop instead.
  * @param {number} [props.siteID] - Single site ID to be pre-selected.
- * @deprecated props.siteID is deprecated since version 0.6.0 - Use value prop instread.
+ * @deprecated props.siteID is deprecated since version 0.6.1 - Use value prop instread.
  */
 import { BaseControl, SearchControl, CheckboxControl, ComboboxControl, Spinner } from "@wordpress/components";
 import { useEffect, useState } from "@wordpress/element";
@@ -38,13 +38,13 @@ export function AssociatedSiteControls( props ) {
 
 	// Handle deprecated props
 	if ( props?.siteArray ) {
-		console.warn( 'The siteArray prop is deprecated since version 0.6.0 - Please use the value prop and isMultiSelect prop instead.' );
+		console.warn( 'The siteArray prop is deprecated since version 0.6.1 - Please use the value prop and isMultiSelect prop instead.' );
 	}
 	if ( props?.siteID ) {
-		console.warn( 'The siteID prop is deprecated since version 0.6.0 - Please use the value prop instead.' );
+		console.warn( 'The siteID prop is deprecated since version 0.6.1 - Please use the value prop instead.' );
 	}
 	if ( props?.isMultiSelect ) {
-		console.warn( 'The isMultiSelect prop is deprecated since version 0.6.0 - Please use the multiple prop instead.' );
+		console.warn( 'The isMultiSelect prop is deprecated since version 0.6.1 - Please use the multiple prop instead.' );
 	}
 
 	// Update state if props.value changes

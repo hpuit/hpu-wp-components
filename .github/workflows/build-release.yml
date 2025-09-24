@@ -41,7 +41,6 @@ jobs:
           tar
             --exclude='*.md'
             --exclude='.git*'
-            --exclude='.github'
             --exclude='node_modules'
             --exclude='output.log'
             --exclude='package*'

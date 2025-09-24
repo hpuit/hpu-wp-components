@@ -54,9 +54,9 @@ jobs:
         run: |
           gh release create "${{ env.VERSION }}" "./${{ env.ARTIFACT }}" \
             --title "${{ env.VERSION }}" \
-            --notes-from-tag \
+            --generate-notes \
             --repo "${{ github.repository }}" \
-            --draft=true \
+            --draft=false \
             --prerelease=false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

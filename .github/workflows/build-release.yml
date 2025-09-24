@@ -48,21 +48,14 @@ jobs:
             --exclude='src'
             -cf - * | gzip -c > "${{ env.ARTIFACT }}"
 
-      - name: 'RELEASE: Create'
-        id: create-new-release
-        uses: actions/create-release@v1
+      - name: 'RELEASE: Create and Upload'
+        id: create-release-and-upload
+        run: |
+          gh release create "${{ env.VERSION }}" "./${{ env.ARTIFACT }}" \
+            --title "${{ env.VERSION }}" \
+            --generate-notes \
+            --repo "${{ github.repository }}" \
+            --draft=false \
+            --prerelease=false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.VERSION }}
-          release_name: ${{ env.VERSION }}
-
-      - name: 'RELEASE: Upload'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-new-release.outputs.upload_url }}
-          asset_path: ./${{ env.ARTIFACT }}
-          asset_name: ${{ env.ARTIFACT }}
-          asset_content_type: application/tar+gzip

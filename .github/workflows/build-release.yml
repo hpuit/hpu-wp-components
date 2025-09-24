@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - prod
+      - feature/workflow-gh-cli-release
 
 permissions:
   contents: write
@@ -54,7 +55,7 @@ jobs:
         run: |
           gh release create "${{ env.VERSION }}" "./${{ env.ARTIFACT }}" \
             --title "${{ env.VERSION }}" \
-            --notes "Release of version ${{ env.VERSION }}" \
+            --generate-notes \
             --repo "${{ github.repository }}" \
             --draft=false \
             --prerelease=false

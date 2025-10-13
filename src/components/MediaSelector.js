@@ -82,7 +82,7 @@ export function MediaSelector( props ) {
 									src={ mediaUrl }
 									alt={ fileName }
 									style={ {
-										height: '200px',
+										maxHeight: '200px',
 										width: 'auto',
 										marginRight: 'auto',
 									} }
@@ -91,9 +91,9 @@ export function MediaSelector( props ) {
 								<video
 									muted
 									src={ mediaUrl }
-									alt={ fileName }
+									aria-label={ fileName }
 									style={ {
-										height: '200px',
+										maxHeight: '200px',
 										width: 'auto',
 										marginRight: 'auto',
 									} }

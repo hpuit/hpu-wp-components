@@ -43,7 +43,6 @@ jobs:
             --exclude='.git*'
             --exclude='node_modules'
             --exclude='output.log'
-            --exclude='package*'
             --exclude='webpack*'
             --exclude='src'
             -cf - * | gzip -c > "${{ env.ARTIFACT }}"

@@ -21,6 +21,7 @@
 		"start": "webpack --watch",
 		"start:clean": "npm run clean && npm run start",
 		"npm:clean": "rm ./package-lock.json && npm install",
+		"prepare": "npm run build",
 		"test": "test"
 	},
 	"repository": {

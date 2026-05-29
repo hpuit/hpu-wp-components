@@ -1,6 +1,6 @@
 {
 	"name": "@hpu-wp/components",
-	"version": "0.6.1",
+	"version": "0.6.2",
 	"description": "Reusable React components for HPU WordPress projects.",
 	"author": "HPU Web Team",
 	"license": "GPL-2.0-or-later",
@@ -16,6 +16,7 @@
 	],
 	"scripts": {
 		"clean": "rimraf build",
+		"prepare": "npm run build",
 		"build": "webpack",
 		"build:clean": "npm run npm:clean && npm run clean && npm run build",
 		"start": "webpack --watch",
@@ -40,7 +41,10 @@
 		"style-loader": "^4.0.0"
 	},
 	"devDependencies": {
+		"@babel/preset-env": "^7.26.0",
+		"@babel/preset-react": "^7.25.9",
 		"@wordpress/components": "^28.13.0",
-		"@wordpress/element": "^6.13.0"
+		"@wordpress/element": "^6.13.0",
+		"babel-loader": "^9.2.1"
 	}
 }

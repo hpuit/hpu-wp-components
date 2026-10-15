@@ -1,22 +1,51 @@
-
+// Results list inline under the search box, inside the panel.
 .hpu-post-search-control--results {
+	margin-top: 8px;
+	max-height: 240px;
+	overflow-y: auto;
+	border: 1px solid #ddd;
+	border-radius: 2px;
 
 	.search-results {
+		margin: 0;
+		padding: 0;
+		list-style: none;
 
 		li.search-result {
-			padding: 5px 10px;
-			max-width: 280px;
-			text-wrap: nowrap;
+			margin: 0;
+
+			&.no-results {
+				padding: 6px 10px;
+				color: #757575;
+			}
+		}
+
+		.search-result--button {
+			display: block;
+			width: 100%;
+			padding: 6px 10px;
+			border: 0;
+			background: none;
+			color: inherit;
+			font: inherit;
+			text-align: left;
+			overflow-wrap: anywhere;
 			cursor: pointer;
 
-			&.selected {
-				background-color: #f0f0f0;
-				color: #9ea1a7;
+			&:hover,
+			&:focus-visible {
+				color: var(--wp-admin-theme-color, #007cba);
 			}
 
-			&:hover:not( .selected ) {
-				color: #007cba;
+			&:focus-visible {
+				outline: 2px solid var(--wp-admin-theme-color, #007cba);
+				outline-offset: -2px;
 			}
+		}
+
+		li.selected .search-result--button {
+			background-color: #f0f0f0;
+			color: #757575;
 		}
 	}
 }

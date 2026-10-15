@@ -22,7 +22,7 @@
 		"start": "webpack --watch",
 		"start:clean": "npm run clean && npm run start",
 		"npm:clean": "rm ./package-lock.json && npm install",
-		"test": "test"
+		"test": "wp-scripts test-unit-js src"
 	},
 	"repository": {
 		"type": "git",

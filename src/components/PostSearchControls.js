@@ -1,10 +1,18 @@
-import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
-import { SearchControl, Popover, Spinner } from '@wordpress/components';
+import { useState, useEffect, useRef } from '@wordpress/element';
+import { SearchControl, Spinner } from '@wordpress/components';
 import { CurrentlySelected } from './CurrentlySelected';
+import {
+	stripSlashes,
+	buildSearchQuery,
+	toResultOptions,
+} from './utils/postSearch';
 import './assets/css/PostSearchControls.scss';
 
 /**
  * Component for controlling post search functionality.
+ *
+ * Results list inline under the search box, inside whatever panel holds the
+ * control. Each search sends the value the editor typed, after a short pause.
  *
  * @param {Object} props - The component props.
  * @param {Array} [props.postArray] - An array of post IDs to initialize the component with.
@@ -19,7 +27,7 @@ import './assets/css/PostSearchControls.scss';
  * @param {string} [props.className] - Additional class names for the component.
  * @param {string} [props.searchLabel] - Label for the search input.
  * @param {string} [props.selectedLabel] - Label for the selected posts section.
- * @param {string} [props.placement] - Placement of the popover for search results.
+ * @param {string} [props.placement] - Deprecated and ignored: results now show in the panel.
  */
 
 export function PostSearchControls( props ) {
@@ -36,14 +44,13 @@ export function PostSearchControls( props ) {
 	} );
 	const [ posts,           setPosts           ] = useState( null );
 	const [ isLoading,       setIsLoading       ] = useState( false );
-	const [ isPopoverOpen,   setIsPopoverOpen   ] = useState( false );
-	const [ isSearchFocused, setIsSearchFocused ] = useState( false );
+	const [ isResultsOpen,   setIsResultsOpen   ] = useState( false );
 	const [ searchInput,     setSearchInput     ] = useState( '' );
 	const [ queriedPosts,    setQueriedPosts    ] = useState( [] );
 
 	// Refs
-	const searchControlRef      = useRef( null );
 	const searchDebounceTimeout = useRef( null );
+	const latestRequest         = useRef( 0 );
 
 	// Constants
 	const isMultiPost  = ( props?.postArray !== undefined );
@@ -54,7 +61,7 @@ export function PostSearchControls( props ) {
 	const postType     = props?.postType     || ( props?.apiNameSpace ? '' : 'posts' );
 	const wpNonce      = props?.wpNonce      || null;
 	const onChange     = props?.onChange     || ( () => {} );
-	const className    = ( props?.className ?? '' ) + 'hpu-post-search-control';
+	const className    = [ props?.className, 'hpu-post-search-control' ].filter( Boolean ).join( ' ' );
 
 	// Synchronize local state with props.postArray
 	useEffect(() => {
@@ -63,9 +70,13 @@ export function PostSearchControls( props ) {
 		}
 	}, [props.postArray]);
 
-	// close out the popover when the api settings change
+	// Drop open results when the api settings change
 	useEffect( () => {
-		setIsPopoverOpen( false );
+		latestRequest.current++;
+		clearTimeout( searchDebounceTimeout.current );
+		setIsResultsOpen( false );
+		setQueriedPosts( [] );
+		setIsLoading( false );
 	}, [ blogPath, blogID, apiDomain, apiNameSpace, postType, wpNonce ] );
 
 	// Handle postID changes and pass to onChange() if it exists
@@ -98,54 +109,51 @@ export function PostSearchControls( props ) {
 		onChange( value );
 	}
 
-	// handle changes to search Input
-	const handleSearchInputChange = useCallback( ( inputValue ) => {
+	// Handle changes to the search input. The request reads inputValue, the
+	// value just typed, and only the newest request may set the results.
+	const handleSearchInputChange = ( inputValue ) => {
 		setSearchInput( inputValue );
-		setIsPopoverOpen( true );
 		clearTimeout( searchDebounceTimeout.current );
+		const requestId = ++latestRequest.current;
 
 		if ( inputValue.length === 0 ) {
+			setIsResultsOpen( false );
 			setQueriedPosts( [] );
 			setIsLoading( false );
 			return;
 		}
 
+		setIsResultsOpen( true );
 		setIsLoading( true );
 
-		// retrieve post list
 		searchDebounceTimeout.current = setTimeout( async () => {
 			try {
 				const apiEndPoint = await constructEndPoint();
-				const searchQuery = searchInput
-					? `?search=${ searchInput }&per_page=20`
-					: '?per_page=20&orderby=date';
 				const nonce       = wpNonce ? `&_wpnonce=${ wpNonce }` : '';
-				const apiQuery    = ( apiEndPoint + searchQuery + nonce );
-				const response    = await fetch ( apiQuery );
-				if ( response.ok ) {
-					const data = await response.json();
-					setQueriedPosts( data.map( ( result ) => ( {
-						label: result?.title?.rendered || results?.name || 'Untitled',
-						value: result.id,
-					} ) ) );
+				const response    = await fetch( apiEndPoint + buildSearchQuery( inputValue ) + nonce );
+				const data        = response.ok ? await response.json() : [];
+				if ( requestId === latestRequest.current ) {
+					setQueriedPosts( toResultOptions( data ) );
 				}
 			}
 			catch ( error ) {
 				console.warn( 'Error fetching posts: ', error );
+				if ( requestId === latestRequest.current ) {
+					setQueriedPosts( [] );
+				}
 			}
 			finally {
-				setIsLoading( false );
+				if ( requestId === latestRequest.current ) {
+					setIsLoading( false );
+				}
 			}
 		}, 600 );
-	} );
+	};
 
-	// Cleanup debounce on component re-render
+	// Cleanup debounce on unmount
 	useEffect( () => {
 		return () => clearTimeout( searchDebounceTimeout.current );
 	}, [] );
-
-	// Strip slashes for endpoint construction
-	const stripSlashes = ( string ) => string?.replace( /^\/|\/$/, '' ) || '';
 
 	// Get blog path for API if needed
 	const fetchBlogPath = async () => {
@@ -155,10 +163,10 @@ export function PostSearchControls( props ) {
 
 		// Check for blog path in custom blog data object
 		if ( window?.HPUCustomBlocksData?.blogs?.[ blogID ]?.path ) {
-			return HPUCustomBlocksData.blogs[ blogID ].path;
+			return window.HPUCustomBlocksData.blogs[ blogID ].path;
 		}
 
-		let apiBlogPath;
+		let apiBlogPath = '/';
 
 		try {
 			const blogApiQuery = `${ apiDomain }/wp-json/hpu/v1/blogs/${ blogID }/`;
@@ -170,7 +178,6 @@ export function PostSearchControls( props ) {
 		}
 		catch ( error ) {
 			console.warn( 'Error fetching blog list: ', error );
-			apiBlogPath = '/';
 		}
 
 		return apiBlogPath;
@@ -178,31 +185,24 @@ export function PostSearchControls( props ) {
 
 	// Construct API endpoint for queries
 	const constructEndPoint = async () => {
-		let queryBlogPath;
 		let queryRoot;
 
 		const queryDomain = stripSlashes( apiDomain );
 
 		// If blogID or blogPath defined - construct the endpoint, else use wpApiSettings for default
-		if ( blogPath ) {
-			queryBlogPath = ( '/' === blogPath ) ? '/' : `/${ stripSlashes( blogPath ) }/`;
-			queryRoot     = `${queryDomain}${queryBlogPath}wp-json/`;
-		}
-		else if ( blogID ) {
-			queryBlogPath = await fetchBlogPath( apiDomain );
-			queryRoot     = `${queryDomain}${queryBlogPath}wp-json/`;
+		if ( blogPath || blogID ) {
+			const path          = blogPath || await fetchBlogPath();
+			const queryBlogPath = stripSlashes( path ) ? `/${ stripSlashes( path ) }/` : '/';
+			queryRoot           = `${ queryDomain }${ queryBlogPath }wp-json/`;
 		}
 		else {
-			queryRoot = wpApiSettings.root;
+			queryRoot = window.wpApiSettings.root;
 		}
 
-		// if using a custon namespace for the api, do not assume a default post-type is needed
+		// if using a custom namespace for the api, do not assume a default post-type is needed
 		const queryNameSpace = stripSlashes( apiNameSpace );
 		const queryPostType  = stripSlashes( postType );
-		const fullApiQuery   = stripSlashes( `${ queryRoot }${ queryNameSpace }/${ queryPostType }` );
-
-		// return the constructed endpoint
-		return fullApiQuery;
+		return stripSlashes( `${ queryRoot }${ queryNameSpace }/${ queryPostType }` );
 	};
 
 	const maybeFetchPosts = () => {
@@ -239,18 +239,59 @@ export function PostSearchControls( props ) {
 		maybeFetchPosts();
 	}, [ postArray ] );
 
+	const selectResult = ( value ) => {
+		addPost( value );
+		if ( ! isMultiPost ) {
+			setIsResultsOpen( false );
+		}
+	};
+
 	// Render Component
 	return (
 		<div className={ className }>
-			<SearchControl
-				ref={ searchControlRef }
-				className='hpu-post-search-control--search-input'
-				label={ props?.searchLabel || 'Search Posts' }
-				hideLabelFromVision={ false }
-				value={ searchInput }
-				onChange={ handleSearchInputChange }
-				__nextHasNoMarginBottom
-			/>
+			<div>
+				{ /* Escape clears the box (core SearchControl), which closes the results. */ }
+				<SearchControl
+					className='hpu-post-search-control--search-input'
+					label={ props?.searchLabel || 'Search Posts' }
+					hideLabelFromVision={ false }
+					value={ searchInput }
+					onChange={ handleSearchInputChange }
+					__nextHasNoMarginBottom
+				/>
+				{ isResultsOpen && searchInput.length ? (
+					<div className='hpu-post-search-control--results'>
+						{ isLoading && <Spinner /> }
+						<ul
+							className='search-results'
+							aria-live='polite'
+							aria-busy={ isLoading }
+						>
+							{ queriedPosts.map( ( result ) => {
+								const isSelected = postArray.includes( result.value );
+								return (
+									<li
+										className={ `search-result${ isSelected ? ' selected' : '' }` }
+										key={ result.value }
+									>
+										<button
+											type='button'
+											className='search-result--button'
+											aria-pressed={ isSelected }
+											onClick={ () => selectResult( result.value ) }
+										>
+											{ result.label }
+										</button>
+									</li>
+								);
+							} ) }
+							{ ! isLoading && ! queriedPosts.length ? (
+								<li className='search-result no-results'>No Results Found. Sorry.</li>
+							) : ( null ) }
+						</ul>
+					</div>
+				) : ( null ) }
+			</div>
 			{ posts && (
 				<CurrentlySelected
 					label={ props?.selectedLabel || 'Selected Posts' }
@@ -259,44 +300,6 @@ export function PostSearchControls( props ) {
 					onRemove={ ( value ) => { removePost( value ) } }
 				/>
 			) }
-			{ isPopoverOpen && searchInput.length ? (
-				<Popover
-					anchor={ searchControlRef.current }
-					className='hpu-post-search-control--results'
-					placement={ props?.placement || 'left-start' }
-					onClose={ () => { setIsPopoverOpen( false ) } }
-				>
-					<ul
-						className='search-results'
-						aria-live='polite'
-					>
-						{ isLoading && <Spinner /> }
-						{ queriedPosts.map( ( result ) => (
-							<li
-								role='button'
-								tabIndex={ 0 }
-								className={
-									`search-result${
-										postArray.includes( result.value )
-											? ' selected'
-											: '' 
-									}` 
-								}
-								key={ result.value }
-								onClick={ () => {
-									addPost( result.value );
-									setIsPopoverOpen( isMultiPost );
-								} }
-							>
-								{ result.label }
-							</li>
-						) ) }
-						{ ! isLoading && ! queriedPosts.length ? (
-							<li className='search-result no-results'>No Results Found. Sorry.</li>
-						) : ( null ) }
-					</ul>
-				</Popover>
-			) : ( null ) }
 		</div>
 	)
 }
